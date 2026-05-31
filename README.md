@@ -1,54 +1,185 @@
-<<<<<<< HEAD
-# Welcome to your Expo app 👋
+# SignBridge
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Mobile companion app for the **SignGlove** assistive glove: receives sensor data over **Bluetooth Classic**, maps gestures to Arabic phrases, and speaks them on-device.
 
-## Get started
+| | |
+|---|---|
+| **Stack** | Expo SDK 54 · React Native 0.81 · TypeScript · Zustand |
+| **Platform** | **Android** (full glove support) · iOS/Web (UI only, no Classic BT) |
+| **Package** | `com.signbridge.app` |
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Current status (May 2026)
 
-2. Start the app
+| Area | Status | Notes |
+|------|--------|--------|
+| Home & navigation | Done | Expo Router: splash → home → modes |
+| Bluetooth Classic | Done | Scan, pair, connect (`react-native-bluetooth-classic`) |
+| Runtime permissions | Done | Android 12+ `BLUETOOTH_CONNECT` / `BLUETOOTH_SCAN` |
+| Live data parser | Done | 14-field CSV lines from ESP32 |
+| **Binary mode** | Done | 5-bit flex → dictionary → `expo-speech` TTS |
+| Manual binary input | Done | Toggle bits without hardware |
+| **Sensor mode UI** | Partial | Live flex bars + buffer preview |
+| LSTM / AI translation | Planned | Phase 2 — placeholder UI only |
+| BLE firmware path | Planned | Phase 3 — Classic SPP today |
 
-   ```bash
-   npx expo start
-   ```
+**Typical workflow today:** pair the glove in Android Bluetooth settings → open SignBridge → **Scan & Connect** → use **Binary Mode** (Glove or Manual). Sensor mode shows live flex when the firmware stream matches the expected format (see [Firmware format](#firmware-data-format)).
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **Binary custom mode** — Real-time binarization (`flex ≥ 2000` → bent), debounced dictionary lookup, Arabic phrase output, TTS with cooldown.
+- **Sensor mode (preview)** — Per-finger flex bars and frame buffer counter; LSTM engine not wired yet.
+- **Device scan modal** — Filters bonded/discovered devices (`SignGlove`, `sign`, `esp32` name hints).
+- **Architecture** — Bluetooth → parser → pipeline router → Zustand store → screens ([details](docs/ARCHITECTURE_REFERENCE.md)).
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Requirements
+
+- **Node.js** 18+ and npm
+- **Android device or emulator** for glove testing
+- **Expo development build** — Bluetooth Classic does **not** work in Expo Go; use `expo run:android` or an EAS build
+- **ESP32 firmware** streaming CSV over Bluetooth Classic SPP (device name e.g. `SignGlove`)
+
+---
+
+## Getting started
+
+### 1. Install dependencies
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Run on Android (development build)
 
-## Learn more
+```bash
+npm run android
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+This runs `expo run:android`, generates the native `android/` project locally (gitignored), and installs a debug build.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### 3. Release APK (local)
 
-## Join the community
+```bash
+npm run android:apk
+```
 
-Join our community of developers creating universal apps.
+### 4. Other scripts
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-=======
-# smart-glove-app
->>>>>>> 7779b362c6eb5c9ddbf9513df033b594a971282f
+| Script | Description |
+|--------|-------------|
+| `npm start` | Metro / Expo dev server |
+| `npm run prebuild:android` | Regenerate native Android project (`expo prebuild --clean`) |
+| `npm run ios` | iOS native run (no Classic BT glove support) |
+| `npm run web` | Static web export |
+| `npm run lint` | ESLint |
+
+---
+
+## Using the glove (Android)
+
+1. Power on the ESP32 glove and pair it in **Settings → Bluetooth** (look for `SignGlove` or similar).
+2. Open SignBridge → **Scan for Devices** → allow **Nearby devices / Bluetooth** when prompted.
+3. Connect from the device list.
+4. **Binary Mode** → select **Glove** (not Manual) for live bits from flex sensors.
+5. **Sensor Mode** → confirms connection; flex values update only when valid CSV frames arrive.
+
+If Bluetooth is on but the app asks to enable it, check app permissions in system settings and reinstall after granting access.
+
+---
+
+## Firmware data format
+
+One line per frame (newline-delimited), **14 comma-separated numbers**:
+
+```text
+<timestamp>,flex_thumb,flex_index,flex_middle,flex_ring,flex_pinky,ax,ay,az,gx,gy,gz,pitch,roll
+```
+
+Legacy prefix also supported:
+
+```text
+DATA,<timestamp_ms>,<f1>..<f5>,<ax>..<roll>
+```
+
+- Sample rate: **20 Hz** (50 ms) recommended  
+- Flex ADC range used in UI: **0–4095**  
+- Binary threshold: **2000**
+
+Full system design: [`docs/ARCHITECTURE_REFERENCE.md`](docs/ARCHITECTURE_REFERENCE.md).
+
+---
+
+## Project structure
+
+```text
+signbridge-app/
+├── app/                      # Expo Router routes (thin wrappers)
+│   ├── index.tsx             # Splash
+│   ├── home.tsx
+│   ├── binary-mode.tsx
+│   └── sensor-mode.tsx
+├── src/
+│   ├── components/           # UI (ConnectionPanel, DeviceScanModal, …)
+│   ├── features/
+│   │   ├── bluetooth/        # BluetoothService, permissions
+│   │   ├── parser/           # GloveDataParser
+│   │   ├── binary/           # Dictionary + binarization
+│   │   ├── ml/               # LSTM placeholder (Phase 2)
+│   │   ├── pipeline/         # Frame stream + mode router
+│   │   └── tts/
+│   ├── screens/              # Screen implementations
+│   ├── providers/            # GlovePipelineProvider
+│   ├── store/                # Zustand app state
+│   ├── hooks/
+│   └── theme/
+├── assets/
+├── docs/
+├── app.json
+└── eas.json
+```
+
+Data flow:
+
+```text
+ESP32 (CSV lines) → BluetoothService → GloveDataParser → gloveFrameStream
+  → GesturePipelineRouter (binary | sensor) → useAppStore → Screens + TTSService
+```
+
+---
+
+## Roadmap
+
+| Phase | Scope |
+|-------|--------|
+| **1** (current) | Binary mode, Classic BT, on-device TTS, manual + glove input |
+| **1.5** | Calibration UI, dictionary editor, richer charts |
+| **2** | Retrain LSTM → TFLite → live Sensor mode inference |
+| **3** | Optional BLE migration, expanded vocabulary |
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---------|----------------|
+| Connected but flex stays at 0 | Firmware not sending CSV, wrong format, or SPP not streaming |
+| “Enable Bluetooth” while BT is on | Missing runtime permissions — allow in app settings |
+| Binary mode doesn’t react | Source set to **Manual** instead of **Glove** |
+| Works on device, not in Expo Go | Expected — use a dev build (`npm run android`) |
+
+---
+
+## Related repositories
+
+Firmware and ML training may live in separate repos (ESP32 `test1.ino`, Python LSTM training). This repo is the **React Native mobile app** only.
+
+---
+
+## License
+
+See repository license file if present; otherwise contact the project maintainers.
