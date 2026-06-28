@@ -3,6 +3,8 @@ import { bluetoothService } from '../features/bluetooth/BluetoothService';
 import { gesturePipeline, gloveFrameStream } from '../features/pipeline';
 import { ttsService } from '../features/tts/TTSService';
 import { useAppStore } from '../store/useAppStore';
+import { translateArabic } from '../features/binary/defaultDictionary';
+import { UNKNOWN_PATTERN } from '../features/binary/defaultDictionary';
 
 /**
  * Single app-level orchestrator: Bluetooth → Parser → Pipeline → Store → TTS.
@@ -17,6 +19,10 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
       inputSourceRef.current = state.inputSource;
       activeModeRef.current = state.activeMode;
     });
+  }, []);
+
+  useEffect(() => {
+    useAppStore.getState().loadHistory();
   }, []);
 
   useEffect(() => {
@@ -39,8 +45,18 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
 
     const unsubResults = gesturePipeline.onResult((result) => {
       useAppStore.getState().setGestureResult(result);
+      if (result.confidence != null) {
+        useAppStore.getState().setConfidence(result.confidence);
+      }
       if (result.isStable && result.phrase) {
         ttsService.speak(result.phrase);
+      }
+      if (result.isStable && result.label && result.label !== UNKNOWN_PATTERN) {
+        useAppStore.getState().addHistory({
+          arabic: result.label,
+          english: translateArabic(result.label),
+          source: result.mode === 'binary' ? 'Binary' : 'AI',
+        });
       }
     });
 

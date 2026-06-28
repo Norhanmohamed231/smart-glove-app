@@ -1,0 +1,61 @@
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Mic } from 'lucide-react-native';
+import { useTheme } from '../theme/ThemeProvider';
+import type { ThemeColors } from '../theme/theme';
+
+interface SpeakToTextCardProps {
+  phrase: string;
+  accuracy: number;
+  isListening: boolean;
+  onMicPress: () => void;
+}
+
+export function SpeakToTextCard({ phrase, accuracy, isListening, onMicPress }: SpeakToTextCardProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.title}>Speak to Text</Text>
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={onMicPress}
+        style={[styles.micButton, isListening && styles.micButtonActive]}
+      >
+        <Mic size={28} color="#FFFFFF" />
+      </TouchableOpacity>
+
+      <Text style={styles.phrase} numberOfLines={2}>
+        {phrase || 'Tap the mic and start speaking'}
+      </Text>
+      <Text style={styles.accuracy}>Accuracy: {Math.round(accuracy)}%</Text>
+    </View>
+  );
+}
+
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      padding: 22,
+      alignItems: 'center',
+    },
+    title: { color: colors.textDescription, fontSize: 14, fontWeight: '600', marginBottom: 16 },
+    micButton: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    micButtonActive: { backgroundColor: colors.accent },
+    phrase: { color: colors.textMain, fontSize: 16, fontWeight: '500', textAlign: 'center' },
+    accuracy: { color: colors.textMuted, fontSize: 13, marginTop: 8 },
+  });

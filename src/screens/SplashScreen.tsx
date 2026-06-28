@@ -1,24 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Sparkles } from 'lucide-react-native';
+import { Hand } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { THEME } from '@/src/theme/theme';
+import { useTheme } from '@/src/theme/ThemeProvider';
+import type { ThemeColors } from '@/src/theme/theme';
 
 export default function SplashScreen() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.85)).current;
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 6, useNativeDriver: true }),
+    ]).start();
 
-    const timer = setTimeout(() => setDone(true), 3000);
+    const timer = setTimeout(() => setDone(true), 2600);
     return () => clearTimeout(timer);
-  }, [fadeAnim]);
+  }, [fadeAnim, scaleAnim]);
 
   useEffect(() => {
     if (done) {
@@ -27,34 +30,43 @@ export default function SplashScreen() {
   }, [done]);
 
   return (
-    <LinearGradient colors={[THEME.colors.backgroundStart, THEME.colors.backgroundMid]} style={styles.container}>
-      <Animated.View style={[styles.splashContent, { opacity: fadeAnim }]}>
-        <View style={styles.logoContainer}>
-          <LinearGradient colors={[THEME.colors.cyanNeon, '#4FACFE', 'transparent']} style={styles.logoGlow} />
-          <Sparkles size={64} color={THEME.colors.cyanNeon} />
+    <LinearGradient
+      colors={[colors.backgroundStart, colors.backgroundMid, colors.backgroundEnd]}
+      style={styles.container}
+    >
+      <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
+        <View style={styles.logoCircle}>
+          <Hand size={64} color={colors.primary} strokeWidth={1.8} />
         </View>
-        <Text style={styles.splashTitle}>SignBridge</Text>
-        <Text style={styles.splashSubtitle}>THE AI GESTURE INTERFACES</Text>
-        <View style={styles.loadingTrack}>
-          <LinearGradient
-            colors={[THEME.colors.cyanNeon, THEME.colors.purpleNeon]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.loadingBar}
-          />
-        </View>
+        <Text style={styles.title}>SignBridge</Text>
+        <Text style={styles.subtitle}>Smart Glove Translation</Text>
       </Animated.View>
+
+      <View style={styles.dotsRow}>
+        <View style={[styles.dot, styles.dotActive]} />
+        <View style={styles.dot} />
+        <View style={styles.dot} />
+      </View>
     </LinearGradient>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  splashContent: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  logoContainer: { width: 140, height: 140, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
-  logoGlow: { position: 'absolute', width: 200, height: 200, borderRadius: 100, opacity: 0.15 },
-  splashTitle: { fontSize: 38, fontWeight: '900', color: THEME.colors.textMain, letterSpacing: 2 },
-  splashSubtitle: { fontSize: 12, color: THEME.colors.textMuted, letterSpacing: 4, marginTop: 8, marginBottom: 48, fontWeight: '600' },
-  loadingTrack: { width: 180, height: 4, backgroundColor: '#1E2243', borderRadius: 2, overflow: 'hidden' },
-  loadingBar: { width: '65%', height: '100%' },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    content: { alignItems: 'center' },
+    logoCircle: {
+      width: 132,
+      height: 132,
+      borderRadius: 36,
+      backgroundColor: colors.primarySoft,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 28,
+    },
+    title: { fontSize: 36, fontWeight: '800', color: colors.textMain, letterSpacing: 0.5 },
+    subtitle: { fontSize: 15, color: colors.textDescription, marginTop: 8, fontWeight: '500' },
+    dotsRow: { flexDirection: 'row', position: 'absolute', bottom: 80, gap: 8 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.cardBorder },
+    dotActive: { width: 20, backgroundColor: colors.primary },
+  });

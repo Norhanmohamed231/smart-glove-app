@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type {
   AppMode,
   ConnectionState,
@@ -7,6 +8,18 @@ import type {
   InputSource,
   BluetoothDeviceInfo,
 } from '../features/parser/types';
+
+export type HistorySource = 'AI' | 'Binary' | 'Speech';
+
+export interface HistoryEntry {
+  id: string;
+  arabic: string;
+  english: string;
+  source: HistorySource;
+  timestamp: number;
+}
+
+const HISTORY_STORAGE_KEY = '@signbridge/history';
 
 interface AppState {
   connectionState: ConnectionState;
@@ -17,6 +30,10 @@ interface AppState {
   gestureResult: GestureResult | null;
   manualBits: number[];
   scannedDevices: BluetoothDeviceInfo[];
+  // Mock until firmware/model wiring (see plan placeholders).
+  battery: number;
+  confidence: number;
+  history: HistoryEntry[];
   setConnectionState: (state: ConnectionState, deviceName?: string | null) => void;
   setActiveMode: (mode: AppMode) => void;
   setInputSource: (source: InputSource) => void;
@@ -25,6 +42,15 @@ interface AppState {
   setManualBits: (bits: number[]) => void;
   toggleManualBit: (index: number) => void;
   setScannedDevices: (devices: BluetoothDeviceInfo[]) => void;
+  setBattery: (battery: number) => void;
+  setConfidence: (confidence: number) => void;
+  addHistory: (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => void;
+  clearHistory: () => void;
+  loadHistory: () => void;
+}
+
+function persistHistory(history: HistoryEntry[]) {
+  AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)).catch(() => {});
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -36,6 +62,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   gestureResult: null,
   manualBits: [0, 0, 0, 0, 0],
   scannedDevices: [],
+  battery: 78,
+  confidence: 0,
+  history: [],
 
   setConnectionState: (connectionState, deviceName = null) =>
     set({ connectionState, connectedDeviceName: deviceName ?? null }),
@@ -57,4 +86,36 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setScannedDevices: (scannedDevices) => set({ scannedDevices }),
+
+  setBattery: (battery) => set({ battery }),
+
+  setConfidence: (confidence) => set({ confidence }),
+
+  addHistory: (entry) => {
+    const newEntry: HistoryEntry = {
+      ...entry,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: Date.now(),
+    };
+    const history = [newEntry, ...get().history].slice(0, 200);
+    set({ history });
+    persistHistory(history);
+  },
+
+  clearHistory: () => {
+    set({ history: [] });
+    persistHistory([]);
+  },
+
+  loadHistory: () => {
+    AsyncStorage.getItem(HISTORY_STORAGE_KEY)
+      .then((raw) => {
+        if (!raw) return;
+        const parsed = JSON.parse(raw) as HistoryEntry[];
+        if (Array.isArray(parsed)) {
+          set({ history: parsed });
+        }
+      })
+      .catch(() => {});
+  },
 }));

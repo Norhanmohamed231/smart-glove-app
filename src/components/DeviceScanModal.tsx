@@ -9,7 +9,8 @@ import {
   ActivityIndicator,
   Pressable,
 } from 'react-native';
-import { THEME } from '../theme/theme';
+import { useTheme } from '../theme/ThemeProvider';
+import type { ThemeColors } from '../theme/theme';
 import { useAppStore } from '../store/useAppStore';
 import type { BluetoothDeviceInfo } from '../features/parser/types';
 
@@ -28,6 +29,8 @@ export function DeviceScanModal({
   onDisconnect,
   isScanning,
 }: DeviceScanModalProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const devices = useAppStore((s) => s.scannedDevices);
   const connectionState = useAppStore((s) => s.connectionState);
   const isConnected = connectionState === 'connected';
@@ -57,7 +60,7 @@ export function DeviceScanModal({
 
           {isScanning ? (
             <View style={styles.centerRow}>
-              <ActivityIndicator color={THEME.colors.cyanNeon} />
+              <ActivityIndicator color={colors.primary} />
               <Text style={styles.scanningText}>Scanning...</Text>
             </View>
           ) : devices.length === 0 ? (
@@ -84,54 +87,55 @@ export function DeviceScanModal({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  sheet: {
-    backgroundColor: '#12142A',
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: THEME.colors.cardBorder,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sheetTitle: { color: THEME.colors.textMain, fontSize: 18, fontWeight: '700' },
-  closeText: { color: THEME.colors.textMuted, fontSize: 20, padding: 4 },
-  centerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 20 },
-  scanningText: { color: THEME.colors.textDescription },
-  emptyText: { color: THEME.colors.textMuted, lineHeight: 20, paddingVertical: 12 },
-  deviceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.colors.cardBorder,
-  },
-  deviceName: { color: THEME.colors.textMain, fontWeight: '600', fontSize: 15 },
-  deviceAddress: { color: THEME.colors.textMuted, fontSize: 12, marginTop: 2 },
-  connectBtn: {
-    backgroundColor: 'rgba(0, 242, 254, 0.15)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  connectBtnText: { color: THEME.colors.cyanNeon, fontWeight: '700' },
-  disconnectBtn: {
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,59,48,0.4)',
-    padding: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  disconnectText: { color: THEME.colors.error, fontWeight: '700' },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    sheet: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    sheetHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    sheetTitle: { color: colors.textMain, fontSize: 18, fontWeight: '700' },
+    closeText: { color: colors.textMuted, fontSize: 20, padding: 4 },
+    centerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 20 },
+    scanningText: { color: colors.textDescription },
+    emptyText: { color: colors.textMuted, lineHeight: 20, paddingVertical: 12 },
+    deviceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.cardBorder,
+    },
+    deviceName: { color: colors.textMain, fontWeight: '600', fontSize: 15 },
+    deviceAddress: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+    connectBtn: {
+      backgroundColor: colors.primarySoft,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 10,
+    },
+    connectBtnText: { color: colors.primary, fontWeight: '700' },
+    disconnectBtn: {
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: colors.error,
+      padding: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    disconnectText: { color: colors.error, fontWeight: '700' },
+  });
