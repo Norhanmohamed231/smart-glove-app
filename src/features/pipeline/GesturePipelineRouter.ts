@@ -12,6 +12,13 @@ export class GesturePipelineRouter {
   private resultListeners = new Set<ResultListener>();
   private lastLiveResult: GestureResult | null = null;
 
+  constructor() {
+    this.lstmProcessor.onPrediction((result) => {
+      this.lastLiveResult = result;
+      this.setGestureResultListeners(result);
+    });
+  }
+
   setActiveMode(mode: AppMode): void {
     if (mode === this.activeMode) return;
     this.getProcessor(this.activeMode).reset();
@@ -47,13 +54,7 @@ export class GesturePipelineRouter {
     if (!result) return null;
 
     this.lastLiveResult = result;
-
-    if (result.isStable) {
-      for (const listener of this.resultListeners) {
-        listener(result);
-      }
-    }
-
+    this.setGestureResultListeners(result);
     return result;
   }
 
@@ -72,6 +73,13 @@ export class GesturePipelineRouter {
     this.binaryProcessor.reset();
     this.lstmProcessor.reset();
     this.lastLiveResult = null;
+  }
+
+  private setGestureResultListeners(result: GestureResult): void {
+    if (!result.isStable) return;
+    for (const listener of this.resultListeners) {
+      listener(result);
+    }
   }
 
   private getProcessor(mode: AppMode): IGestureProcessor {
