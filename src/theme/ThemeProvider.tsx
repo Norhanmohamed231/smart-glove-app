@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { palettes, type ThemeColors, type ThemeMode } from './theme';
 
-const STORAGE_KEY = '@signbridge/theme-mode';
+const STORAGE_KEY = '@signtalker/theme-mode';
 
 interface ThemeContextValue {
   mode: ThemeMode;

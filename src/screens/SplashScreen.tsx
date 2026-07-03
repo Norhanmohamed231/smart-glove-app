@@ -38,7 +38,7 @@ export default function SplashScreen() {
         <View style={styles.logoCircle}>
           <Hand size={64} color={colors.primary} strokeWidth={1.8} />
         </View>
-        <Text style={styles.title}>SignBridge</Text>
+        <Text style={styles.title}>signTalker</Text>
         <Text style={styles.subtitle}>Smart Glove Translation</Text>
       </Animated.View>
 

@@ -36,7 +36,7 @@ export default function HomeScreen() {
     if (stateAfterScan === 'error') {
       Alert.alert(
         'Bluetooth unavailable',
-        'Allow Nearby devices / Bluetooth permissions for SignBridge in system settings, confirm Bluetooth is on, then scan again.',
+        'Allow Nearby devices / Bluetooth permissions for signTalker in system settings, confirm Bluetooth is on, then scan again.',
       );
       return;
     }

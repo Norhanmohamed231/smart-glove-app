@@ -33,7 +33,7 @@ export async function ensureBluetoothPermissions(): Promise<BluetoothPermissionS
     {
       title: 'Location permission',
       message:
-        'SignBridge needs location access to discover nearby Bluetooth gloves (required by Android for device scanning).',
+        'signTalker needs location access to discover nearby Bluetooth gloves (required by Android for device scanning).',
       buttonPositive: 'Allow',
       buttonNegative: 'Deny',
     },

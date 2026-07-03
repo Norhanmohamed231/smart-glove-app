@@ -1,8 +1,8 @@
-# SignBridge — Architecture Reference (Full System)
+# signTalker — Architecture Reference (Full System)
 
-> **Status:** Reference document — do not edit for day-to-day Phase 1 work.  
+> **Status:** Reference document — do not edit for day-to-day work.  
 > **Active plan:** [phase1_binary_mode.plan.md](../.cursor/plans/phase1_binary_mode.plan.md)  
-> **Last updated:** 2026-05-31
+> **Last updated:** 2026-07-03
 
 ---
 
@@ -17,7 +17,7 @@ Closed-loop assistive system: ESP32 glove → wireless stream → React Native a
 | LSTM training | `en-sign-language/` | `.h5` + `.joblib`, not mobile-ready |
 | TTS reference | `Smart_Gloves/mobile_app/` | Flask API pattern (optional fallback) |
 
-**Direction:** Phase 1 = Binary Mode + Bluetooth Classic + on-device TTS. Phase 2 = LSTM on-device.
+**Direction:** Binary Mode + Bluetooth Classic + on-device TTS + ONNX LSTM AI mode + on-device Arabic STT.
 
 ---
 

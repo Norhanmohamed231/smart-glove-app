@@ -20,7 +20,7 @@ export interface HistoryEntry {
   timestamp: number;
 }
 
-const HISTORY_STORAGE_KEY = '@signbridge/history';
+const HISTORY_STORAGE_KEY = '@signtalker/history';
 
 interface AppState {
   connectionState: ConnectionState;

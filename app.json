@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "SignBridge",
-    "slug": "signbridge",
+    "name": "signTalker",
+    "slug": "signtalker",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "signbridge",
+    "scheme": "signtalker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "SignBridge connects to the smart glove via Bluetooth to receive sensor data.",
-        "NSMicrophoneUsageDescription": "SignBridge needs microphone access for speech-to-text.",
-        "NSSpeechRecognitionUsageDescription": "SignBridge needs speech recognition to convert your voice to text."
+        "NSBluetoothAlwaysUsageDescription": "signTalker connects to the smart glove via Bluetooth to receive sensor data.",
+        "NSMicrophoneUsageDescription": "signTalker needs microphone access for speech-to-text.",
+        "NSSpeechRecognitionUsageDescription": "signTalker needs speech recognition to convert your voice to text."
       }
     },
     "android": {
@@ -27,7 +27,7 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.signbridge.app",
+      "package": "com.signtalker.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png"
       }
@@ -40,8 +40,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "SignBridge needs microphone access for speech-to-text.",
-          "speechRecognitionPermission": "SignBridge needs speech recognition to convert your voice to text.",
+          "microphonePermission": "signTalker needs microphone access for speech-to-text.",
+          "speechRecognitionPermission": "signTalker needs speech recognition to convert your voice to text.",
           "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
         }
       ],

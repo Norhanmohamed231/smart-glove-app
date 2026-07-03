@@ -1,37 +1,40 @@
-# SignBridge
+# signTalker
 
-Mobile companion app for the **SignGlove** assistive glove: receives sensor data over **Bluetooth Classic**, maps gestures to Arabic phrases, and speaks them on-device.
+Mobile companion app for the **SignGlove** assistive glove: receives sensor data over **Bluetooth Classic**, maps gestures to Arabic phrases, runs on-device LSTM inference, and speaks results on the device.
 
 | | |
 |---|---|
 | **Stack** | Expo SDK 54 · React Native 0.81 · TypeScript · Zustand |
 | **Platform** | **Android** (full glove support) · iOS/Web (UI only, no Classic BT) |
-| **Package** | `com.signbridge.app` |
+| **Package** | `com.signtalker.app` |
 
 ---
 
-## Current status (May 2026)
+## Current status (July 2026)
 
 | Area | Status | Notes |
 |------|--------|--------|
-| Home & navigation | Done | Expo Router: splash → home → modes |
+| Home & navigation | Done | Expo Router: splash → home → choose mode → AI / Binary / History |
 | Bluetooth Classic | Done | Scan, pair, connect (`react-native-bluetooth-classic`) |
-| Runtime permissions | Done | Android 12+ `BLUETOOTH_CONNECT` / `BLUETOOTH_SCAN` |
+| Runtime permissions | Done | Android 12+ `BLUETOOTH_CONNECT` / `BLUETOOTH_SCAN` + `RECORD_AUDIO` |
 | Live data parser | Done | 14-field CSV lines from ESP32 |
 | **Binary mode** | Done | 5-bit flex → dictionary → `expo-speech` TTS |
 | Manual binary input | Done | Toggle bits without hardware |
-| **Sensor mode UI** | Partial | Live flex bars + buffer preview |
-| LSTM / AI translation | Planned | Phase 2 — placeholder UI only |
+| **AI mode** | Done | ONNX LSTM (20 classes) · manual Start/Stop recording |
+| **Speak to Text** | Done | On-device Arabic STT (`expo-speech-recognition`) |
+| History | Done | AI / Binary / Speech entries persisted in AsyncStorage |
+| Battery indicator | Partial | Placeholder value in UI until firmware wiring |
 | BLE firmware path | Planned | Phase 3 — Classic SPP today |
 
-**Typical workflow today:** pair the glove in Android Bluetooth settings → open SignBridge → **Scan & Connect** → use **Binary Mode** (Glove or Manual). Sensor mode shows live flex when the firmware stream matches the expected format (see [Firmware format](#firmware-data-format)).
+**Typical workflow:** pair the glove in Android Bluetooth settings → open signTalker → **Scan & Connect** → use **Binary Mode** or **AI Mode** (Start/Stop recording). Use **Speak to Text** for voice input in Arabic (requires Google Arabic offline speech pack).
 
 ---
 
 ## Features
 
-- **Binary custom mode** — Real-time binarization (`flex ≥ 2000` → bent), debounced dictionary lookup, Arabic phrase output, TTS with cooldown.
-- **Sensor mode (preview)** — Per-finger flex bars and frame buffer counter; LSTM engine not wired yet.
+- **Binary mode** — Real-time binarization (`flex ≥ 2000` → bent), debounced dictionary lookup, Arabic phrase output, TTS with cooldown.
+- **AI mode** — Gesture recording via Start/Stop → ONNX LSTM inference → Arabic word + confidence → TTS + History.
+- **Speak to Text** — On-device Arabic speech recognition (ar-EG / ar-SA); tap mic to start/stop.
 - **Device scan modal** — Filters bonded/discovered devices (`SignGlove`, `sign`, `esp32` name hints).
 - **Architecture** — Bluetooth → parser → pipeline router → Zustand store → screens ([details](docs/ARCHITECTURE_REFERENCE.md)).
 
@@ -40,9 +43,10 @@ Mobile companion app for the **SignGlove** assistive glove: receives sensor data
 ## Requirements
 
 - **Node.js** 18+ and npm
-- **Android device or emulator** for glove testing
-- **Expo development build** — Bluetooth Classic does **not** work in Expo Go; use `expo run:android` or an EAS build
+- **Android device** for glove + STT testing (emulator limited for Bluetooth)
+- **Expo development build** — Bluetooth Classic, ONNX, and STT do **not** work in Expo Go; use `expo run:android` or an EAS build
 - **ESP32 firmware** streaming CSV over Bluetooth Classic SPP (device name e.g. `SignGlove`)
+- **STT:** Google Arabic offline speech recognition pack installed on the device
 
 ---
 
@@ -60,7 +64,12 @@ npm install
 npm run android
 ```
 
-This runs `expo run:android`, generates the native `android/` project locally (gitignored), and installs a debug build.
+This runs `expo run:android`, uses the native `android/` project, and installs a debug build. After changing `app.json` native settings (package name, plugins), run:
+
+```bash
+npm run prebuild:android
+npm run android
+```
 
 ### 3. Release APK (local)
 
@@ -83,12 +92,24 @@ npm run android:apk
 ## Using the glove (Android)
 
 1. Power on the ESP32 glove and pair it in **Settings → Bluetooth** (look for `SignGlove` or similar).
-2. Open SignBridge → **Scan for Devices** → allow **Nearby devices / Bluetooth** when prompted.
+2. Open signTalker → **Scan for Devices** → allow **Nearby devices / Bluetooth** when prompted.
 3. Connect from the device list.
 4. **Binary Mode** → select **Glove** (not Manual) for live bits from flex sensors.
-5. **Sensor Mode** → confirms connection; flex values update only when valid CSV frames arrive.
+5. **AI Mode** → press **Start Recording**, perform the gesture, then **Stop** → view detected word and confidence.
 
 If Bluetooth is on but the app asks to enable it, check app permissions in system settings and reinstall after granting access.
+
+---
+
+## AI model assets
+
+Bundled under `assets/models/`:
+
+| File | Purpose |
+|------|---------|
+| `sign_lstm.onnx` | On-device LSTM inference |
+| `preprocessors.json` | Scaler, classes, thresholds |
+| `word_signatures.json` | Hybrid finger-pattern filter |
 
 ---
 
@@ -106,8 +127,8 @@ Legacy prefix also supported:
 DATA,<timestamp_ms>,<f1>..<f5>,<ax>..<roll>
 ```
 
-- Sample rate: **20 Hz** (50 ms) recommended  
-- Flex ADC range used in UI: **0–4095**  
+- Sample rate: **20 Hz** (50 ms) recommended
+- Flex ADC range used in UI: **0–4095**
 - Binary threshold: **2000**
 
 Full system design: [`docs/ARCHITECTURE_REFERENCE.md`](docs/ARCHITECTURE_REFERENCE.md).
@@ -117,27 +138,30 @@ Full system design: [`docs/ARCHITECTURE_REFERENCE.md`](docs/ARCHITECTURE_REFEREN
 ## Project structure
 
 ```text
-signbridge-app/
-├── app/                      # Expo Router routes (thin wrappers)
+signtalker/
+├── app/                      # Expo Router routes
 │   ├── index.tsx             # Splash
 │   ├── home.tsx
+│   ├── choose-mode.tsx
+│   ├── ai-mode.tsx
 │   ├── binary-mode.tsx
-│   └── sensor-mode.tsx
+│   └── history.tsx
 ├── src/
-│   ├── components/           # UI (ConnectionPanel, DeviceScanModal, …)
+│   ├── components/
 │   ├── features/
-│   │   ├── bluetooth/        # BluetoothService, permissions
-│   │   ├── parser/           # GloveDataParser
-│   │   ├── binary/           # Dictionary + binarization
-│   │   ├── ml/               # LSTM placeholder (Phase 2)
-│   │   ├── pipeline/         # Frame stream + mode router
+│   │   ├── bluetooth/
+│   │   ├── parser/
+│   │   ├── binary/
+│   │   ├── ml/               # ONNX LSTM pipeline
+│   │   ├── stt/              # On-device speech-to-text
+│   │   ├── pipeline/
 │   │   └── tts/
-│   ├── screens/              # Screen implementations
-│   ├── providers/            # GlovePipelineProvider
-│   ├── store/                # Zustand app state
+│   ├── screens/
+│   ├── providers/
+│   ├── store/
 │   ├── hooks/
 │   └── theme/
-├── assets/
+├── assets/models/
 ├── docs/
 ├── app.json
 └── eas.json
@@ -146,8 +170,8 @@ signbridge-app/
 Data flow:
 
 ```text
-ESP32 (CSV lines) → BluetoothService → GloveDataParser → gloveFrameStream
-  → GesturePipelineRouter (binary | sensor) → useAppStore → Screens + TTSService
+ESP32 (CSV) → BluetoothService → GloveDataParser → gloveFrameStream
+  → GesturePipelineRouter (binary | sensor) → useAppStore → Screens + TTS
 ```
 
 ---
@@ -156,9 +180,10 @@ ESP32 (CSV lines) → BluetoothService → GloveDataParser → gloveFrameStream
 
 | Phase | Scope |
 |-------|--------|
-| **1** (current) | Binary mode, Classic BT, on-device TTS, manual + glove input |
-| **1.5** | Calibration UI, dictionary editor, richer charts |
-| **2** | Retrain LSTM → TFLite → live Sensor mode inference |
+| **1** | Binary mode, Classic BT, on-device TTS — **done** |
+| **2** | AI mode with ONNX LSTM — **done** |
+| **2.5** | On-device Arabic STT — **done** |
+| **1.5** | Calibration UI, dictionary editor, real battery from glove |
 | **3** | Optional BLE migration, expanded vocabulary |
 
 ---
@@ -170,13 +195,15 @@ ESP32 (CSV lines) → BluetoothService → GloveDataParser → gloveFrameStream
 | Connected but flex stays at 0 | Firmware not sending CSV, wrong format, or SPP not streaming |
 | “Enable Bluetooth” while BT is on | Missing runtime permissions — allow in app settings |
 | Binary mode doesn’t react | Source set to **Manual** instead of **Glove** |
+| AI model failed to load | Rebuild native app after ONNX plugin changes (`prebuild:android`) |
+| STT unavailable | Install Arabic offline speech pack in Google voice settings |
 | Works on device, not in Expo Go | Expected — use a dev build (`npm run android`) |
 
 ---
 
 ## Related repositories
 
-Firmware and ML training may live in separate repos (ESP32 `test1.ino`, Python LSTM training). This repo is the **React Native mobile app** only.
+Firmware and ML training may live in separate repos (ESP32 firmware, Python LSTM training). This repo is the **React Native mobile app** only.
 
 ---
 
