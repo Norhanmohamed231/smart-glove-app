@@ -197,7 +197,7 @@ BLE firmware migration, expanded vocabulary, Arabic TTS
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    SIGNBRIDGE — SYSTEM ARCHITECTURE v1.0                     ║
+║                    signTalker — SYSTEM ARCHITECTURE v1.0                     ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  PHYSICAL: 5× Flex + MPU6050 + OLED                                          ║
 ║  EMBEDDED: ESP32 → Calibrate → Filter → CSV → BluetoothSerial (SignGlove)    ║
