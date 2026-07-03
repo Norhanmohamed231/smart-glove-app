@@ -6,6 +6,7 @@ import { gesturePipeline } from '../features/pipeline';
 import { ttsService } from '../features/tts/TTSService';
 import { useAppStore } from '../store/useAppStore';
 import type { AppMode } from '../features/parser/types';
+import { getAiEnglish } from '../features/ml/aiLabelMap';
 
 /** Activate the correct processor when a mode screen gains focus. */
 export function useActiveMode(mode: AppMode): void {
@@ -82,5 +83,47 @@ export function useBinaryDisplay() {
     pattern,
     label: gestureResult?.label ?? fallback.label,
     phrase: gestureResult?.phrase ?? fallback.phrase,
+  };
+}
+
+const AI_LISTENING_LABELS = {
+  idle: 'AI model loading...',
+  waiting_motion: 'Waiting for gesture...',
+  collecting: 'Collecting gesture...',
+  predicting: 'Recognizing sign...',
+} as const;
+
+export function useAiDisplay() {
+  const gestureResult = useAppStore((s) => s.gestureResult);
+  const confidence = useAppStore((s) => s.confidence);
+  const modelStatus = useAppStore((s) => s.modelStatus);
+  const modelError = useAppStore((s) => s.modelError);
+  const aiCollectionState = useAppStore((s) => s.aiCollectionState);
+  const connectionState = useAppStore((s) => s.connectionState);
+
+  const arabic = gestureResult?.label ?? '—';
+  const english = arabic !== '—' ? getAiEnglish(arabic) : '—';
+  const displayConfidence = gestureResult?.confidence ?? confidence ?? 0;
+
+  let listeningLabel: string = AI_LISTENING_LABELS.waiting_motion;
+  if (modelStatus === 'loading' || modelStatus === 'idle') {
+    listeningLabel = AI_LISTENING_LABELS.idle;
+  } else if (modelStatus === 'error') {
+    listeningLabel = modelError ?? 'AI model failed to load';
+  } else if (connectionState !== 'connected') {
+    listeningLabel = 'Connect glove to start AI mode';
+  } else if (aiCollectionState in AI_LISTENING_LABELS) {
+    listeningLabel = AI_LISTENING_LABELS[aiCollectionState as keyof typeof AI_LISTENING_LABELS];
+  }
+
+  return {
+    arabic,
+    english,
+    confidence: displayConfidence,
+    listeningLabel,
+    modelStatus,
+    isReady: modelStatus === 'ready',
+    isConnected: connectionState === 'connected',
+    hasDetection: Boolean(gestureResult?.isStable && gestureResult.label),
   };
 }

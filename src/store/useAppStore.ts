@@ -8,6 +8,7 @@ import type {
   InputSource,
   BluetoothDeviceInfo,
 } from '../features/parser/types';
+import type { AiCollectionState, ModelStatus } from '../features/ml/types';
 
 export type HistorySource = 'AI' | 'Binary' | 'Speech';
 
@@ -33,6 +34,9 @@ interface AppState {
   // Mock until firmware/model wiring (see plan placeholders).
   battery: number;
   confidence: number;
+  modelStatus: ModelStatus;
+  modelError: string | null;
+  aiCollectionState: AiCollectionState;
   history: HistoryEntry[];
   setConnectionState: (state: ConnectionState, deviceName?: string | null) => void;
   setActiveMode: (mode: AppMode) => void;
@@ -44,6 +48,8 @@ interface AppState {
   setScannedDevices: (devices: BluetoothDeviceInfo[]) => void;
   setBattery: (battery: number) => void;
   setConfidence: (confidence: number) => void;
+  setModelStatus: (status: ModelStatus, error?: string | null) => void;
+  setAiCollectionState: (state: AiCollectionState) => void;
   addHistory: (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => void;
   clearHistory: () => void;
   loadHistory: () => void;
@@ -64,6 +70,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   scannedDevices: [],
   battery: 78,
   confidence: 0,
+  modelStatus: 'idle',
+  modelError: null,
+  aiCollectionState: 'waiting_motion',
   history: [],
 
   setConnectionState: (connectionState, deviceName = null) =>
@@ -90,6 +99,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setBattery: (battery) => set({ battery }),
 
   setConfidence: (confidence) => set({ confidence }),
+
+  setModelStatus: (modelStatus, modelError = null) => set({ modelStatus, modelError }),
+
+  setAiCollectionState: (aiCollectionState) => set({ aiCollectionState }),
 
   addHistory: (entry) => {
     const newEntry: HistoryEntry = {

@@ -7,30 +7,30 @@ import type { ThemeColors } from '@/src/theme/theme';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { DetectionCard } from '@/src/components/DetectionCard';
 import { SpeakToTextCard } from '@/src/components/SpeakToTextCard';
-import { useActiveMode } from '@/src/hooks/useGlovePipeline';
+import { useActiveMode, useAiDisplay } from '@/src/hooks/useGlovePipeline';
 import { ttsService } from '@/src/features/tts/TTSService';
 import { useAppStore } from '@/src/store/useAppStore';
 import { recognizeSpeechMock } from '@/src/features/stt/mockStt';
-
-// Mock detection until the LSTM model is wired in (Phase 2).
-const MOCK_DETECTION = { arabic: 'مرحبا', english: 'Hello', confidence: 96 };
+import { AI_UNKNOWN_AR } from '@/src/features/ml/aiLabelMap';
 
 export default function AiModeScreen() {
   useActiveMode('sensor');
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  const { arabic, english, confidence, listeningLabel, hasDetection } = useAiDisplay();
   const addHistory = useAppStore((s) => s.addHistory);
   const [speech, setSpeech] = useState({ phrase: '', accuracy: 0 });
   const [isListening, setIsListening] = useState(false);
 
   const handleCopy = async () => {
-    await Clipboard.setStringAsync(MOCK_DETECTION.english);
+    if (english !== '—') await Clipboard.setStringAsync(english);
   };
 
   const handleSpeak = () => {
-    ttsService.speak(MOCK_DETECTION.arabic, true);
-    addHistory({ arabic: MOCK_DETECTION.arabic, english: MOCK_DETECTION.english, source: 'AI' });
+    if (arabic === '—' || arabic === AI_UNKNOWN_AR) return;
+    ttsService.speak(arabic, true);
+    addHistory({ arabic, english, source: 'AI' });
   };
 
   const handleMic = () => {
@@ -51,9 +51,10 @@ export default function AiModeScreen() {
       <ScreenHeader title="AI Mode" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <DetectionCard
-          arabicWord={MOCK_DETECTION.arabic}
-          english={MOCK_DETECTION.english}
-          confidence={MOCK_DETECTION.confidence}
+          listeningLabel={listeningLabel}
+          arabicWord={arabic}
+          english={english}
+          confidence={hasDetection ? confidence : 0}
           onCopy={handleCopy}
           onSpeak={handleSpeak}
         />
