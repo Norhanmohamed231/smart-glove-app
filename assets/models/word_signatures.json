@@ -1,0 +1,142 @@
+{
+  "إنت": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "اسكت": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "اسمي": [
+    false,
+    false,
+    true,
+    true,
+    false
+  ],
+  "اكل": [
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "الافضل": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "السلام عليكم": [
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "انا": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "بحبك": [
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "تعبان": [
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "زعلان": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "سهل": [
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "شكرا": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "عاوز": [
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "قوي": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "كريم": [
+    false,
+    false,
+    true,
+    true,
+    false
+  ],
+  "كليه الهندسه": [
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "لأ": [
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "لو سمحت": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "مسؤول": [
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "نعم": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ]
+}
