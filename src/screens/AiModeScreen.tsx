@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
@@ -9,9 +9,9 @@ import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { DetectionCard } from '@/src/components/DetectionCard';
 import { SpeakToTextCard } from '@/src/components/SpeakToTextCard';
 import { useActiveMode, useAiDisplay, useAiRecording } from '@/src/hooks/useGlovePipeline';
+import { useStt } from '@/src/hooks/useStt';
 import { ttsService } from '@/src/features/tts/TTSService';
 import { useAppStore } from '@/src/store/useAppStore';
-import { recognizeSpeechMock } from '@/src/features/stt/mockStt';
 import { AI_UNKNOWN_AR } from '@/src/features/ml/aiLabelMap';
 
 export default function AiModeScreen() {
@@ -21,9 +21,16 @@ export default function AiModeScreen() {
 
   const { arabic, english, confidence, listeningLabel, hasDetection } = useAiDisplay();
   const { isRecording, canRecord, collectedCount, toggleRecording } = useAiRecording();
+  const {
+    phrase,
+    accuracy,
+    isListening,
+    isAvailable,
+    isChecking,
+    error,
+    toggleListening,
+  } = useStt();
   const addHistory = useAppStore((s) => s.addHistory);
-  const [speech, setSpeech] = useState({ phrase: '', accuracy: 0 });
-  const [isListening, setIsListening] = useState(false);
 
   const handleCopy = async () => {
     if (english !== '—') await Clipboard.setStringAsync(english);
@@ -33,16 +40,6 @@ export default function AiModeScreen() {
     if (arabic === '—' || arabic === AI_UNKNOWN_AR) return;
     ttsService.speak(arabic, true);
     addHistory({ arabic, english, source: 'AI' });
-  };
-
-  const handleMic = () => {
-    setIsListening(true);
-    setTimeout(() => {
-      const result = recognizeSpeechMock();
-      setSpeech({ phrase: result.arabic, accuracy: result.accuracy });
-      addHistory({ arabic: result.arabic, english: result.english, source: 'Speech' });
-      setIsListening(false);
-    }, 1200);
   };
 
   return (
@@ -84,10 +81,12 @@ export default function AiModeScreen() {
         <View style={styles.spacer} />
 
         <SpeakToTextCard
-          phrase={speech.phrase}
-          accuracy={speech.accuracy || 95}
+          phrase={phrase}
+          accuracy={accuracy}
           isListening={isListening}
-          onMicPress={handleMic}
+          onMicPress={toggleListening}
+          error={error}
+          disabled={!isAvailable && !isChecking}
         />
       </ScrollView>
     </LinearGradient>

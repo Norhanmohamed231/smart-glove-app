@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
@@ -13,11 +13,10 @@ import {
   useBinaryDisplay,
   useManualBinaryInput,
 } from '@/src/hooks/useGlovePipeline';
+import { useStt } from '@/src/hooks/useStt';
 import { useAppStore } from '@/src/store/useAppStore';
 import { ttsService } from '@/src/features/tts/TTSService';
-import { lookupEnglish } from '@/src/features/binary/defaultDictionary';
-import { UNKNOWN_PATTERN } from '@/src/features/binary/defaultDictionary';
-import { recognizeSpeechMock } from '@/src/features/stt/mockStt';
+import { lookupEnglish, UNKNOWN_PATTERN } from '@/src/features/binary/defaultDictionary';
 
 const { width: screenWidth } = Dimensions.get('window');
 const FINGER_LABELS = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
@@ -35,9 +34,15 @@ export default function BinaryModeScreen() {
   const setInputSource = useAppStore((s) => s.setInputSource);
   const addHistory = useAppStore((s) => s.addHistory);
   const { toggleManualBit } = useManualBinaryInput();
-
-  const [speech, setSpeech] = useState({ phrase: '', accuracy: 0 });
-  const [isListening, setIsListening] = useState(false);
+  const {
+    phrase,
+    accuracy,
+    isListening,
+    isAvailable,
+    isChecking,
+    error,
+    toggleListening,
+  } = useStt();
 
   const isConnected = connectionState === 'connected';
   const bitsKey = liveBits.join('');
@@ -54,16 +59,6 @@ export default function BinaryModeScreen() {
     if (!isKnown) return;
     ttsService.speak(label, true);
     addHistory({ arabic: label, english, source: 'Binary' });
-  };
-
-  const handleMic = () => {
-    setIsListening(true);
-    setTimeout(() => {
-      const result = recognizeSpeechMock();
-      setSpeech({ phrase: result.arabic, accuracy: result.accuracy });
-      addHistory({ arabic: result.arabic, english: result.english, source: 'Speech' });
-      setIsListening(false);
-    }, 1200);
   };
 
   return (
@@ -130,10 +125,12 @@ export default function BinaryModeScreen() {
         <View style={styles.spacer} />
 
         <SpeakToTextCard
-          phrase={speech.phrase}
-          accuracy={speech.accuracy || 96}
+          phrase={phrase}
+          accuracy={accuracy}
           isListening={isListening}
-          onMicPress={handleMic}
+          onMicPress={toggleListening}
+          error={error}
+          disabled={!isAvailable && !isChecking}
         />
       </ScrollView>
     </LinearGradient>

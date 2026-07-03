@@ -9,9 +9,20 @@ interface SpeakToTextCardProps {
   accuracy: number;
   isListening: boolean;
   onMicPress: () => void;
+  error?: string | null;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-export function SpeakToTextCard({ phrase, accuracy, isListening, onMicPress }: SpeakToTextCardProps) {
+export function SpeakToTextCard({
+  phrase,
+  accuracy,
+  isListening,
+  onMicPress,
+  error,
+  disabled = false,
+  placeholder = 'اضغط المايك واتكلم بالعربي',
+}: SpeakToTextCardProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
@@ -22,15 +33,26 @@ export function SpeakToTextCard({ phrase, accuracy, isListening, onMicPress }: S
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onMicPress}
-        style={[styles.micButton, isListening && styles.micButtonActive]}
+        disabled={disabled && !isListening}
+        style={[
+          styles.micButton,
+          isListening && styles.micButtonActive,
+          disabled && !isListening && styles.micButtonDisabled,
+        ]}
       >
         <Mic size={28} color="#FFFFFF" />
       </TouchableOpacity>
 
-      <Text style={styles.phrase} numberOfLines={2}>
-        {phrase || 'Tap the mic and start speaking'}
+      <Text style={styles.statusText}>
+        {isListening ? 'جاري الاستماع... اضغط مرة أخرى للإيقاف' : 'اضغط للبدء'}
+      </Text>
+
+      <Text style={styles.phrase} numberOfLines={3}>
+        {phrase || placeholder}
       </Text>
       <Text style={styles.accuracy}>Accuracy: {Math.round(accuracy)}%</Text>
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
 }
@@ -53,9 +75,23 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.primary,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 16,
+      marginBottom: 12,
     },
-    micButtonActive: { backgroundColor: colors.accent },
+    micButtonActive: { backgroundColor: '#E53935' },
+    micButtonDisabled: { opacity: 0.45 },
+    statusText: {
+      color: colors.textMuted,
+      fontSize: 13,
+      marginBottom: 12,
+      textAlign: 'center',
+    },
     phrase: { color: colors.textMain, fontSize: 16, fontWeight: '500', textAlign: 'center' },
     accuracy: { color: colors.textMuted, fontSize: 13, marginTop: 8 },
+    error: {
+      color: '#E53935',
+      fontSize: 13,
+      marginTop: 12,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
   });
