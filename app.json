@@ -10,7 +10,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "SignBridge connects to the smart glove via Bluetooth to receive sensor data."
+        "NSBluetoothAlwaysUsageDescription": "SignBridge connects to the smart glove via Bluetooth to receive sensor data.",
+        "NSMicrophoneUsageDescription": "SignBridge needs microphone access for speech-to-text.",
+        "NSSpeechRecognitionUsageDescription": "SignBridge needs speech recognition to convert your voice to text."
       }
     },
     "android": {
@@ -22,7 +24,8 @@
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO"
       ],
       "package": "com.signbridge.app",
       "adaptiveIcon": {
@@ -34,6 +37,14 @@
     },
     "plugins": [
       "onnxruntime-react-native",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "SignBridge needs microphone access for speech-to-text.",
+          "speechRecognitionPermission": "SignBridge needs speech recognition to convert your voice to text.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
