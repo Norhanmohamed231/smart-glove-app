@@ -33,6 +33,7 @@
       "output": "static"
     },
     "plugins": [
+      "onnxruntime-react-native",
       "expo-router",
       [
         "expo-splash-screen",

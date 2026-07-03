@@ -1,4 +1,7 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const config =getDefaultConfig(__dirname);
+
+const config = getDefaultConfig(__dirname);
 config.resolver.sourceExts.push('mjs');
-module.exports =config;
+config.resolver.assetExts.push('onnx');
+
+module.exports = config;
