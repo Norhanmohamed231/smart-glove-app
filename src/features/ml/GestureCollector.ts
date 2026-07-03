@@ -1,24 +1,15 @@
 import type { GloveFrame } from '../parser/types';
-import type { AiCollectionState, ModelConfig } from './types';
+import type { AiCollectionState } from './types';
 
-export interface GestureCollectionResult {
-  state: AiCollectionState;
-  frames: GloveFrame[] | null;
-}
+const MIN_FRAMES = 5;
 
 export class GestureCollector {
-  private state: AiCollectionState = 'waiting_motion';
-  private motionBuffer: boolean[] = [];
+  private state: AiCollectionState = 'idle';
   private collectedFrames: GloveFrame[] = [];
-  private collectionStartedAt = 0;
-
-  constructor(private config: ModelConfig) {}
 
   reset(): void {
-    this.state = 'waiting_motion';
-    this.motionBuffer = [];
+    this.state = 'idle';
     this.collectedFrames = [];
-    this.collectionStartedAt = 0;
   }
 
   getState(): AiCollectionState {
@@ -29,46 +20,28 @@ export class GestureCollector {
     return this.collectedFrames.length;
   }
 
-  onFrame(frame: GloveFrame): GestureCollectionResult {
-    if (this.state === 'waiting_motion') {
-      return this.handleWaiting(frame);
-    }
-
-    return this.handleCollecting(frame);
+  start(): boolean {
+    if (this.state !== 'idle') return false;
+    this.state = 'collecting';
+    this.collectedFrames = [];
+    return true;
   }
 
-  private handleWaiting(frame: GloveFrame): GestureCollectionResult {
-    const motion =
-      Math.abs(frame.imu.ax) + Math.abs(frame.imu.ay) + Math.abs(frame.imu.az);
-    const isActive = motion > this.config.preprocessing.motion_threshold;
-
-    this.motionBuffer.push(isActive);
-    const windowSize = this.config.preprocessing.window_size;
-    if (this.motionBuffer.length > windowSize) {
-      this.motionBuffer.shift();
-    }
-
-    const sustained = this.motionBuffer.filter(Boolean).length;
-    if (sustained >= this.config.preprocessing.sustained_threshold) {
-      this.state = 'collecting';
-      this.collectedFrames = [frame];
-      this.collectionStartedAt = Date.now();
-      return { state: 'collecting', frames: null };
-    }
-
-    return { state: 'waiting_motion', frames: null };
-  }
-
-  private handleCollecting(frame: GloveFrame): GestureCollectionResult {
-    this.collectedFrames.push(frame);
-    const elapsedSec = (Date.now() - this.collectionStartedAt) / 1000;
-
-    if (elapsedSec < this.config.preprocessing.gesture_collection_seconds) {
-      return { state: 'collecting', frames: null };
-    }
+  /** Stop recording and return frames when enough samples were captured. */
+  stop(): GloveFrame[] | null {
+    if (this.state !== 'collecting') return null;
 
     const frames = [...this.collectedFrames];
-    this.reset();
-    return { state: 'predicting', frames };
+    this.collectedFrames = [];
+    this.state = 'idle';
+
+    if (frames.length < MIN_FRAMES) return null;
+    return frames;
+  }
+
+  onFrame(frame: GloveFrame): void {
+    if (this.state === 'collecting') {
+      this.collectedFrames.push(frame);
+    }
   }
 }

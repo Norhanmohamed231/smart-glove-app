@@ -38,6 +38,14 @@ export class GesturePipelineRouter {
     return this.lstmProcessor;
   }
 
+  startAiRecording(): boolean {
+    return this.lstmProcessor.startRecording();
+  }
+
+  stopAiRecording(): boolean {
+    return this.lstmProcessor.stopRecording();
+  }
+
   onResult(listener: ResultListener): () => void {
     this.resultListeners.add(listener);
     return () => this.resultListeners.delete(listener);

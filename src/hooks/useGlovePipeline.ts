@@ -87,11 +87,41 @@ export function useBinaryDisplay() {
 }
 
 const AI_LISTENING_LABELS = {
-  idle: 'AI model loading...',
-  waiting_motion: 'Waiting for gesture...',
-  collecting: 'Collecting gesture...',
+  idle: 'Press Start to record a gesture',
+  collecting: 'Recording gesture...',
   predicting: 'Recognizing sign...',
 } as const;
+
+export function useAiRecording() {
+  const aiCollectionState = useAppStore((s) => s.aiCollectionState);
+  const modelStatus = useAppStore((s) => s.modelStatus);
+  const connectionState = useAppStore((s) => s.connectionState);
+  const latestFrame = useAppStore((s) => s.latestFrame);
+
+  const isRecording = aiCollectionState === 'collecting';
+  const isPredicting = aiCollectionState === 'predicting';
+  const canRecord =
+    modelStatus === 'ready' && connectionState === 'connected' && !isPredicting;
+  const collectedCount = isRecording ? gesturePipeline.getLstmProcessor().getCollectedCount() : 0;
+
+  const toggleRecording = () => {
+    if (!canRecord && !isRecording) return;
+    if (isRecording) {
+      gesturePipeline.stopAiRecording();
+    } else {
+      gesturePipeline.startAiRecording();
+    }
+  };
+
+  return {
+    isRecording,
+    isPredicting,
+    canRecord,
+    collectedCount,
+    toggleRecording,
+    latestFrame,
+  };
+}
 
 export function useAiDisplay() {
   const gestureResult = useAppStore((s) => s.gestureResult);
@@ -105,9 +135,9 @@ export function useAiDisplay() {
   const english = arabic !== '—' ? getAiEnglish(arabic) : '—';
   const displayConfidence = gestureResult?.confidence ?? confidence ?? 0;
 
-  let listeningLabel: string = AI_LISTENING_LABELS.waiting_motion;
+  let listeningLabel: string = AI_LISTENING_LABELS.idle;
   if (modelStatus === 'loading' || modelStatus === 'idle') {
-    listeningLabel = AI_LISTENING_LABELS.idle;
+    listeningLabel = 'AI model loading...';
   } else if (modelStatus === 'error') {
     listeningLabel = modelError ?? 'AI model failed to load';
   } else if (connectionState !== 'connected') {

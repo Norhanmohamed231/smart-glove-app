@@ -3,7 +3,6 @@ import type { IGestureProcessor } from '../pipeline/IGestureProcessor';
 import type { AiCollectionState } from './types';
 import { GestureCollector } from './GestureCollector';
 import { lstmInferenceEngine } from './LSTMInferenceEngine';
-import { getModelConfig } from './modelAssets';
 import { AI_UNKNOWN_AR } from './aiLabelMap';
 
 type PredictionListener = (result: GestureResult) => void;
@@ -12,7 +11,7 @@ type StateListener = (state: AiCollectionState) => void;
 export class LSTMGestureProcessor implements IGestureProcessor {
   readonly mode = 'sensor' as const;
 
-  private collector = new GestureCollector(getModelConfig());
+  private collector = new GestureCollector();
   private predicting = false;
   private lastFrames: GloveFrame[] = [];
   private predictionListeners = new Set<PredictionListener>();
@@ -23,19 +22,34 @@ export class LSTMGestureProcessor implements IGestureProcessor {
       return null;
     }
 
-    const collection = this.collector.onFrame(frame);
-    this.emitState(collection.state);
-
-    if (!collection.frames || collection.frames.length === 0) {
-      return null;
+    if (this.collector.getState() === 'collecting') {
+      this.collector.onFrame(frame);
     }
 
-    this.lastFrames = collection.frames;
+    return null;
+  }
+
+  startRecording(): boolean {
+    if (!lstmInferenceEngine.isReady() || this.predicting) return false;
+    const started = this.collector.start();
+    if (started) this.emitState('collecting');
+    return started;
+  }
+
+  stopRecording(): boolean {
+    if (this.predicting) return false;
+
+    const frames = this.collector.stop();
+    if (!frames) {
+      this.emitState('idle');
+      return false;
+    }
+
+    this.lastFrames = frames;
     this.predicting = true;
     this.emitState('predicting');
-
-    void this.runPrediction(collection.frames);
-    return null;
+    void this.runPrediction(frames);
+    return true;
   }
 
   onPrediction(listener: PredictionListener): () => void {
@@ -53,19 +67,27 @@ export class LSTMGestureProcessor implements IGestureProcessor {
   }
 
   getLatestFrame(): GloveFrame | null {
-    const frames = this.collector.getCollectedCount() > 0 ? this.lastFrames : [];
-    return frames.length > 0 ? frames[frames.length - 1] : null;
+    return this.lastFrames.length > 0 ? this.lastFrames[this.lastFrames.length - 1] : null;
   }
 
   getCollectionState(): AiCollectionState {
-    return this.predicting ? 'predicting' : this.collector.getState();
+    if (this.predicting) return 'predicting';
+    return this.collector.getState();
+  }
+
+  getCollectedCount(): number {
+    return this.collector.getCollectedCount();
+  }
+
+  isRecording(): boolean {
+    return this.collector.getState() === 'collecting';
   }
 
   reset(): void {
     this.collector.reset();
     this.predicting = false;
     this.lastFrames = [];
-    this.emitState('waiting_motion');
+    this.emitState('idle');
   }
 
   private async runPrediction(frames: GloveFrame[]): Promise<void> {
@@ -96,7 +118,7 @@ export class LSTMGestureProcessor implements IGestureProcessor {
       }
     } finally {
       this.predicting = false;
-      this.emitState('waiting_motion');
+      this.emitState('idle');
     }
   }
 

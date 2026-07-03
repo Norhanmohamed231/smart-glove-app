@@ -1,5 +1,5 @@
 export type ModelStatus = 'idle' | 'loading' | 'ready' | 'error';
-export type AiCollectionState = 'idle' | 'waiting_motion' | 'collecting' | 'predicting';
+export type AiCollectionState = 'idle' | 'collecting' | 'predicting';
 
 export interface PreprocessingConfig {
   smooth_window: number;

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
+import { Mic, Square } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeProvider';
 import type { ThemeColors } from '@/src/theme/theme';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { DetectionCard } from '@/src/components/DetectionCard';
 import { SpeakToTextCard } from '@/src/components/SpeakToTextCard';
-import { useActiveMode, useAiDisplay } from '@/src/hooks/useGlovePipeline';
+import { useActiveMode, useAiDisplay, useAiRecording } from '@/src/hooks/useGlovePipeline';
 import { ttsService } from '@/src/features/tts/TTSService';
 import { useAppStore } from '@/src/store/useAppStore';
 import { recognizeSpeechMock } from '@/src/features/stt/mockStt';
@@ -19,6 +20,7 @@ export default function AiModeScreen() {
   const styles = createStyles(colors);
 
   const { arabic, english, confidence, listeningLabel, hasDetection } = useAiDisplay();
+  const { isRecording, canRecord, collectedCount, toggleRecording } = useAiRecording();
   const addHistory = useAppStore((s) => s.addHistory);
   const [speech, setSpeech] = useState({ phrase: '', accuracy: 0 });
   const [isListening, setIsListening] = useState(false);
@@ -59,6 +61,26 @@ export default function AiModeScreen() {
           onSpeak={handleSpeak}
         />
 
+        <TouchableOpacity
+          style={[
+            styles.recordButton,
+            isRecording ? styles.recordButtonStop : styles.recordButtonStart,
+            !canRecord && !isRecording && styles.recordButtonDisabled,
+          ]}
+          activeOpacity={0.85}
+          onPress={toggleRecording}
+          disabled={!canRecord && !isRecording}
+        >
+          {isRecording ? (
+            <Square size={22} color="#fff" fill="#fff" />
+          ) : (
+            <Mic size={22} color="#fff" />
+          )}
+          <Text style={styles.recordButtonText}>
+            {isRecording ? `Stop (${collectedCount} frames)` : 'Start Recording'}
+          </Text>
+        </TouchableOpacity>
+
         <View style={styles.spacer} />
 
         <SpeakToTextCard
@@ -77,4 +99,27 @@ const createStyles = (colors: ThemeColors) =>
     container: { flex: 1 },
     scroll: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 40 },
     spacer: { height: 18 },
+    recordButton: {
+      marginTop: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      paddingVertical: 16,
+      borderRadius: 18,
+    },
+    recordButtonStart: {
+      backgroundColor: colors.primary,
+    },
+    recordButtonStop: {
+      backgroundColor: '#E53935',
+    },
+    recordButtonDisabled: {
+      opacity: 0.45,
+    },
+    recordButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '700',
+    },
   });

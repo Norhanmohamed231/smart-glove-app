@@ -72,7 +72,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   confidence: 0,
   modelStatus: 'idle',
   modelError: null,
-  aiCollectionState: 'waiting_motion',
+  aiCollectionState: 'idle',
   history: [],
 
   setConnectionState: (connectionState, deviceName = null) =>
