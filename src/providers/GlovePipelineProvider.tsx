@@ -34,6 +34,7 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
       .then(() => useAppStore.getState().setModelStatus('ready'))
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : 'Model load failed';
+        console.warn('[signTalker] ONNX model load failed:', message);
         useAppStore.getState().setModelStatus('error', message);
       });
   }, []);

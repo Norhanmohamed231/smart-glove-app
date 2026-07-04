@@ -27,8 +27,13 @@ export default function AiModeScreen() {
     isListening,
     isAvailable,
     isChecking,
+    modeHint,
+    showInstallPack,
+    isInstallingPack,
     error,
+    info,
     toggleListening,
+    installOfflinePack,
   } = useStt();
   const addHistory = useAppStore((s) => s.addHistory);
 
@@ -85,8 +90,13 @@ export default function AiModeScreen() {
           accuracy={accuracy}
           isListening={isListening}
           onMicPress={toggleListening}
+          modeHint={modeHint}
+          showInstallPack={showInstallPack}
+          isInstallingPack={isInstallingPack}
+          onInstallPack={installOfflinePack}
+          info={info}
           error={error}
-          disabled={!isAvailable && !isChecking}
+          disabled={isChecking}
         />
       </ScrollView>
     </LinearGradient>

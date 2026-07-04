@@ -1,6 +1,6 @@
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
-import { InferenceSession, Tensor } from 'onnxruntime-react-native';
+import type { InferenceSession } from 'onnxruntime-react-native';
 
 import onnxModel from '@/assets/models/sign_lstm.onnx';
 import type { ModelConfig, ModelStatus, PredictionResult, WordSignatures } from './types';
@@ -9,6 +9,17 @@ import { preprocessGestureFrames } from './Preprocessor';
 import { filterLogits, getCandidateClasses, softmax } from './HybridFilter';
 import { AI_UNKNOWN_AR } from './aiLabelMap';
 import type { GloveFrame } from '../parser/types';
+
+type OrtModule = typeof import('onnxruntime-react-native');
+
+let ortModulePromise: Promise<OrtModule> | null = null;
+
+async function getOrtModule(): Promise<OrtModule> {
+  if (!ortModulePromise) {
+    ortModulePromise = import('onnxruntime-react-native');
+  }
+  return ortModulePromise;
+}
 
 class LSTMInferenceEngine {
   private session: InferenceSession | null = null;
@@ -36,6 +47,8 @@ class LSTMInferenceEngine {
     this.error = null;
 
     try {
+      const { InferenceSession } = await getOrtModule();
+
       const asset = Asset.fromModule(onnxModel);
       await asset.downloadAsync();
 
@@ -62,6 +75,7 @@ class LSTMInferenceEngine {
       throw new Error('ONNX session is not loaded');
     }
 
+    const { Tensor } = await getOrtModule();
     const input = preprocessGestureFrames(frames, this.config);
     const candidates = getCandidateClasses(frames, this.config, this.signatures);
     const { sequence_length, input_size, classes, preprocessing } = this.config;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Mic } from 'lucide-react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import type { ThemeColors } from '../theme/theme';
@@ -10,6 +10,11 @@ interface SpeakToTextCardProps {
   isListening: boolean;
   onMicPress: () => void;
   error?: string | null;
+  info?: string | null;
+  modeHint?: string | null;
+  showInstallPack?: boolean;
+  isInstallingPack?: boolean;
+  onInstallPack?: () => void;
   disabled?: boolean;
   placeholder?: string;
 }
@@ -20,6 +25,11 @@ export function SpeakToTextCard({
   isListening,
   onMicPress,
   error,
+  info,
+  modeHint,
+  showInstallPack = false,
+  isInstallingPack = false,
+  onInstallPack,
   disabled = false,
   placeholder = 'اضغط المايك واتكلم بالعربي',
 }: SpeakToTextCardProps) {
@@ -47,11 +57,29 @@ export function SpeakToTextCard({
         {isListening ? 'جاري الاستماع... اضغط مرة أخرى للإيقاف' : 'اضغط للبدء'}
       </Text>
 
+      {modeHint ? <Text style={styles.modeHint}>{modeHint}</Text> : null}
+
+      {showInstallPack && onInstallPack ? (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={onInstallPack}
+          disabled={isInstallingPack}
+          style={styles.installButton}
+        >
+          {isInstallingPack ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={styles.installButtonText}>تحميل حزمة العربية (Offline)</Text>
+          )}
+        </TouchableOpacity>
+      ) : null}
+
       <Text style={styles.phrase} numberOfLines={3}>
         {phrase || placeholder}
       </Text>
       <Text style={styles.accuracy}>Accuracy: {Math.round(accuracy)}%</Text>
 
+      {info ? <Text style={styles.info}>{info}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
@@ -82,11 +110,40 @@ const createStyles = (colors: ThemeColors) =>
     statusText: {
       color: colors.textMuted,
       fontSize: 13,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    modeHint: {
+      color: colors.primary,
+      fontSize: 12,
       marginBottom: 12,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    installButton: {
+      backgroundColor: colors.primarySoft,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      marginBottom: 12,
+      minWidth: 220,
+      alignItems: 'center',
+    },
+    installButtonText: {
+      color: colors.primary,
+      fontSize: 13,
+      fontWeight: '600',
       textAlign: 'center',
     },
     phrase: { color: colors.textMain, fontSize: 16, fontWeight: '500', textAlign: 'center' },
     accuracy: { color: colors.textMuted, fontSize: 13, marginTop: 8 },
+    info: {
+      color: colors.primary,
+      fontSize: 13,
+      marginTop: 12,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
     error: {
       color: '#E53935',
       fontSize: 13,

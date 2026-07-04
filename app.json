@@ -37,18 +37,25 @@
     },
     "plugins": [
       "onnxruntime-react-native",
+      "./plugins/withOnnxRuntimePackage.js",
+      "./plugins/withSttPackInstaller.js",
       [
         "expo-speech-recognition",
         {
           "microphonePermission": "signTalker needs microphone access for speech-to-text.",
           "speechRecognitionPermission": "signTalker needs speech recognition to convert your voice to text.",
-          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
         }
       ],
       "expo-router",
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splashscreen_logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
           "backgroundColor": "#070814",
           "dark": {
             "backgroundColor": "#070814"
@@ -56,11 +63,11 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-asset"
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
       "router": {},

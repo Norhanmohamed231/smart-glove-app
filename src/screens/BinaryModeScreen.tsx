@@ -40,8 +40,13 @@ export default function BinaryModeScreen() {
     isListening,
     isAvailable,
     isChecking,
+    modeHint,
+    showInstallPack,
+    isInstallingPack,
     error,
+    info,
     toggleListening,
+    installOfflinePack,
   } = useStt();
 
   const isConnected = connectionState === 'connected';
@@ -129,8 +134,13 @@ export default function BinaryModeScreen() {
           accuracy={accuracy}
           isListening={isListening}
           onMicPress={toggleListening}
+          modeHint={modeHint}
+          showInstallPack={showInstallPack}
+          isInstallingPack={isInstallingPack}
+          onInstallPack={installOfflinePack}
+          info={info}
           error={error}
-          disabled={!isAvailable && !isChecking}
+          disabled={isChecking}
         />
       </ScrollView>
     </LinearGradient>
