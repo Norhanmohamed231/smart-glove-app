@@ -28,6 +28,22 @@ Mobile companion app for the **SignGlove** assistive glove: receives sensor data
 
 **Typical workflow:** pair the glove in Android Bluetooth settings → open signTalker → **Scan & Connect** → use **Binary Mode** or **AI Mode** (Start/Stop recording). Use **Speak to Text** for voice input in Arabic (requires Google Arabic offline speech pack).
 
+## Documentation
+
+Detailed guides (Arabic) in [`docs/`](docs/README.md):
+
+| Doc | Topic |
+|-----|--------|
+| [docs/README.md](docs/README.md) | Index |
+| [01-project-overview.md](docs/01-project-overview.md) | Overview & status |
+| [02-setup-and-build.md](docs/02-setup-and-build.md) | Install & APK build |
+| [03-glove-firmware.md](docs/03-glove-firmware.md) | Glove protocol & pairing |
+| [04-binary-mode.md](docs/04-binary-mode.md) | Binary mode |
+| [05-ai-mode.md](docs/05-ai-mode.md) | AI / LSTM mode |
+| [06-stt.md](docs/06-stt.md) | Speech-to-text |
+| [07-architecture.md](docs/07-architecture.md) | Architecture |
+| [08-troubleshooting.md](docs/08-troubleshooting.md) | Troubleshooting |
+
 ---
 
 ## Features
@@ -36,7 +52,7 @@ Mobile companion app for the **SignGlove** assistive glove: receives sensor data
 - **AI mode** — Gesture recording via Start/Stop → ONNX LSTM inference → Arabic word + confidence → TTS + History.
 - **Speak to Text** — On-device Arabic speech recognition (ar-EG / ar-SA); tap mic to start/stop.
 - **Device scan modal** — Filters bonded/discovered devices (`SignGlove`, `sign`, `esp32` name hints).
-- **Architecture** — Bluetooth → parser → pipeline router → Zustand store → screens ([details](docs/ARCHITECTURE_REFERENCE.md)).
+- **Architecture** — Bluetooth → parser → pipeline router → Zustand store → screens ([details](docs/07-architecture.md)).
 
 ---
 
@@ -71,16 +87,25 @@ npm run prebuild:android
 npm run android
 ```
 
-### 3. Release APK (local)
+### 3. Release APK (team — ARM phones)
+
+```bash
+npm run apk:team
+```
+
+Output: `android/app/build/outputs/apk/release/app-release.apk` (~93 MB). See [docs/02-setup-and-build.md](docs/02-setup-and-build.md).
+
+### 4. Full release APK
 
 ```bash
 npm run android:apk
 ```
 
-### 4. Other scripts
+### 5. Other scripts
 
 | Script | Description |
 |--------|-------------|
+| `npm run apk:team` | Release APK for real devices (ARM only, smaller) |
 | `npm start` | Metro / Expo dev server |
 | `npm run prebuild:android` | Regenerate native Android project (`expo prebuild --clean`) |
 | `npm run ios` | iOS native run (no Classic BT glove support) |
@@ -115,23 +140,20 @@ Bundled under `assets/models/`:
 
 ## Firmware data format
 
-One line per frame (newline-delimited), **14 comma-separated numbers**:
-
-```text
-<timestamp>,flex_thumb,flex_index,flex_middle,flex_ring,flex_pinky,ax,ay,az,gx,gy,gz,pitch,roll
-```
-
-Legacy prefix also supported:
+One line per frame, line ending **`\r`** or **`\n`** (ESP32 BluetoothSerial often sends `\r` only).
 
 ```text
 DATA,<timestamp_ms>,<f1>..<f5>,<ax>..<roll>
 ```
 
-- Sample rate: **20 Hz** (50 ms) recommended
-- Flex ADC range used in UI: **0–4095**
-- Binary threshold: **2000**
+14 numeric fields after timestamp (flex RAW 0–4095, IMU in g and °/s).
 
-Full system design: [`docs/ARCHITECTURE_REFERENCE.md`](docs/ARCHITECTURE_REFERENCE.md).
+Legacy format without `DATA` prefix is also accepted.
+
+- Sample rate: **20 Hz** (50 ms)
+- Binary threshold: **2000** (`flex >= 2000` → bit 1)
+
+Full protocol: [`docs/03-glove-firmware.md`](docs/03-glove-firmware.md). Architecture: [`docs/07-architecture.md`](docs/07-architecture.md).
 
 ---
 
@@ -192,7 +214,8 @@ ESP32 (CSV) → BluetoothService → GloveDataParser → gloveFrameStream
 
 | Symptom | Likely cause |
 |---------|----------------|
-| Connected but flex stays at 0 | Firmware not sending CSV, wrong format, or SPP not streaming |
+| Connected, flex stays 0 | Sensors, calibration, or CSV format — see [troubleshooting](docs/08-troubleshooting.md) |
+| Data received but no frames | Old APK without `\r` parser fix — rebuild with `npm run apk:team` |
 | “Enable Bluetooth” while BT is on | Missing runtime permissions — allow in app settings |
 | Binary mode doesn’t react | Source set to **Manual** instead of **Glove** |
 | AI model failed to load | Rebuild native app after ONNX plugin changes (`prebuild:android`) |

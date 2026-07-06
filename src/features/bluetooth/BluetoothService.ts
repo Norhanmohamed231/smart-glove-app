@@ -128,7 +128,7 @@ class BluetoothService {
 
       this.parser.reset();
       const device = await RNBluetoothClassic.connectToDevice(deviceId, {
-        delimiter: '\n',
+        delimiter: '\r',
       });
 
       this.connectedDevice = device;

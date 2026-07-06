@@ -1,6 +1,8 @@
-# signTalker — Architecture Reference (Full System)
+# signTalker — Architecture Reference (Legacy)
 
-> **Status:** Reference document — do not edit for day-to-day work.  
+> **Note:** This document is an early English reference. For up-to-date detail, use **[docs/07-architecture.md](./07-architecture.md)** and the [docs index](./README.md).
+
+> **Status:** Reference document — superseded by `docs/` for day-to-day work.  
 > **Active plan:** [phase1_binary_mode.plan.md](../.cursor/plans/phase1_binary_mode.plan.md)  
 > **Last updated:** 2026-07-03
 

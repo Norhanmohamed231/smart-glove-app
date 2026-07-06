@@ -1,6 +1,9 @@
 import type { GloveFrame } from './types';
 
 const EXPECTED_FIELDS = 14;
+/** ESP32 BluetoothSerial often terminates lines with \r only (not \n). */
+const LINE_DELIMITER_RE = /\r\n|\n|\r/;
+const MAX_BUFFER_CHARS = 16_384;
 
 function buildFrame(values: number[]): GloveFrame | null {
   if (values.length < EXPECTED_FIELDS) return null;
@@ -45,12 +48,17 @@ export class GloveDataParser {
 
   pushChunk(chunk: string): GloveFrame[] {
     this.buffer += chunk;
-    const lines = this.buffer.split(/\r?\n/);
-    this.buffer = lines.pop() ?? '';
+
+    if (this.buffer.length > MAX_BUFFER_CHARS) {
+      this.buffer = this.buffer.slice(-MAX_BUFFER_CHARS / 2);
+    }
+
+    const splitLines = this.buffer.split(LINE_DELIMITER_RE);
+    this.buffer = splitLines.pop() ?? '';
 
     const frames: GloveFrame[] = [];
-    for (const line of lines) {
-      const frame = this.parseLine(line);
+    for (const raw of splitLines) {
+      const frame = this.parseLine(raw);
       if (frame) frames.push(frame);
     }
     return frames;
@@ -58,7 +66,7 @@ export class GloveDataParser {
 
   parseLine(rawLine: string): GloveFrame | null {
     const line = rawLine.trim();
-    if (!line || line.startsWith('timestamp,')) return null;
+    if (!line || line.startsWith('timestamp,') || line.startsWith('[')) return null;
 
     const payload = line.startsWith('DATA,') ? line.slice(5) : line;
     const values = payload.split(',').map((part) => Number(part.trim()));
