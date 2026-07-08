@@ -33,6 +33,15 @@
 
 ---
 
+## فريق التخرج (12 فرد)
+
+| الملف | المحتوى |
+|-------|---------|
+| [TEAM_DIVISION.md](./TEAM_DIVISION.md) | التقسيمة العامة — 3 محاور × 4 أفراد |
+| [team/README.md](./team/README.md) | ملف تفصيلي لكل عضو (01–12) |
+
+---
+
 ## مرجع إضافي
 
 - [ARCHITECTURE_REFERENCE.md](./ARCHITECTURE_REFERENCE.md) — وثيقة مرجعية أولية (إنجليزي، قديمة جزئياً)

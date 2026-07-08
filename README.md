@@ -30,7 +30,7 @@ Mobile companion app for the **SignGlove** assistive glove: receives sensor data
 
 ## Documentation
 
-Detailed guides (Arabic) in [`docs/`](docs/README.md):
+Detailed guides (Arabic) in [`docs/`](docs/README.md). Team roles (12 members): [`docs/TEAM_DIVISION.md`](docs/TEAM_DIVISION.md).
 
 | Doc | Topic |
 |-----|--------|
@@ -43,6 +43,7 @@ Detailed guides (Arabic) in [`docs/`](docs/README.md):
 | [06-stt.md](docs/06-stt.md) | Speech-to-text |
 | [07-architecture.md](docs/07-architecture.md) | Architecture |
 | [08-troubleshooting.md](docs/08-troubleshooting.md) | Troubleshooting |
+| [TEAM_DIVISION.md](docs/TEAM_DIVISION.md) | Graduation team roles (12) |
 
 ---
 
