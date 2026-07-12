@@ -27,6 +27,7 @@ interface AppState {
   connectedDeviceName: string | null;
   activeMode: AppMode;
   inputSource: InputSource;
+  isTranslationActive: boolean;
   latestFrame: GloveFrame | null;
   gestureResult: GestureResult | null;
   manualBits: number[];
@@ -41,6 +42,7 @@ interface AppState {
   setConnectionState: (state: ConnectionState, deviceName?: string | null) => void;
   setActiveMode: (mode: AppMode) => void;
   setInputSource: (source: InputSource) => void;
+  setTranslationActive: (active: boolean) => void;
   setLatestFrame: (frame: GloveFrame | null) => void;
   setGestureResult: (result: GestureResult | null) => void;
   setManualBits: (bits: number[]) => void;
@@ -64,6 +66,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   connectedDeviceName: null,
   activeMode: 'binary',
   inputSource: 'glove',
+  isTranslationActive: false,
   latestFrame: null,
   gestureResult: null,
   manualBits: [0, 0, 0, 0, 0],
@@ -81,6 +84,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setActiveMode: (activeMode) => set({ activeMode }),
 
   setInputSource: (inputSource) => set({ inputSource }),
+
+  setTranslationActive: (isTranslationActive) => set({ isTranslationActive }),
 
   setLatestFrame: (latestFrame) => set({ latestFrame }),
 

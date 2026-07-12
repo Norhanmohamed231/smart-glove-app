@@ -22,16 +22,20 @@ const { width: screenWidth } = Dimensions.get('window');
 const FINGER_LABELS = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
 
 export default function BinaryModeScreen() {
-  useActiveMode('binary');
+  useActiveMode('binary', { initialTranslationActive: false });
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const insets = useSafeAreaInsets();
+  const [hasStarted, setHasStarted] = React.useState(false);
 
   const { liveBits, pattern, label } = useBinaryDisplay();
   const inputSource = useAppStore((s) => s.inputSource);
   const connectionState = useAppStore((s) => s.connectionState);
+  const isTranslationActive = useAppStore((s) => s.isTranslationActive);
   const setInputSource = useAppStore((s) => s.setInputSource);
+  const setTranslationActive = useAppStore((s) => s.setTranslationActive);
+  const setGestureResult = useAppStore((s) => s.setGestureResult);
   const addHistory = useAppStore((s) => s.addHistory);
   const { toggleManualBit } = useManualBinaryInput();
   const {
@@ -53,17 +57,34 @@ export default function BinaryModeScreen() {
   const bitsKey = liveBits.join('');
   const english = lookupEnglish(bitsKey);
   const isKnown = label !== UNKNOWN_PATTERN;
-  const confidence = isKnown ? 100 : 0;
+  const canUseDetection = isTranslationActive && isKnown;
+  const confidence = canUseDetection ? 100 : 0;
   const nodeWidth = (screenWidth - 48 - 8 * 4) / 5;
+  const translationButtonLabel = isTranslationActive ? 'Pause Translation' : hasStarted ? 'Resume Translation' : 'Start Translation';
+  const listeningLabel = isTranslationActive
+    ? 'Live binary translation active'
+    : hasStarted
+      ? 'Translation paused'
+      : 'Press Start to begin binary translation';
 
   const handleCopy = async () => {
-    if (isKnown) await Clipboard.setStringAsync(english);
+    if (canUseDetection) await Clipboard.setStringAsync(english);
   };
 
   const handleSpeak = () => {
-    if (!isKnown) return;
+    if (!canUseDetection) return;
     ttsService.speak(label, true);
     addHistory({ arabic: label, english, source: 'Binary' });
+  };
+
+  const handleToggleTranslation = () => {
+    const nextActive = !isTranslationActive;
+    setTranslationActive(nextActive);
+    if (nextActive) {
+      setHasStarted(true);
+    } else {
+      setGestureResult(null);
+    }
   };
 
   return (
@@ -77,12 +98,21 @@ export default function BinaryModeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <DetectionCard
-          arabicWord={isKnown ? label : '—'}
-          english={isKnown ? english : '—'}
+          listeningLabel={listeningLabel}
+          arabicWord={canUseDetection ? label : '—'}
+          english={canUseDetection ? english : '—'}
           confidence={confidence}
           onCopy={handleCopy}
           onSpeak={handleSpeak}
         />
+
+        <TouchableOpacity
+          style={[styles.translationButton, isTranslationActive ? styles.translationButtonPause : styles.translationButtonStart]}
+          activeOpacity={0.85}
+          onPress={handleToggleTranslation}
+        >
+          <Text style={styles.translationButtonText}>{translationButtonLabel}</Text>
+        </TouchableOpacity>
 
         <Text style={styles.sectionLabel}>BIT MATRIX CONTROLLER</Text>
         <View style={styles.bitRow}>
@@ -158,6 +188,24 @@ const createStyles = (colors: ThemeColors) =>
       letterSpacing: 2,
       marginTop: 24,
       marginBottom: 14,
+    },
+    translationButton: {
+      marginTop: 16,
+      borderRadius: 18,
+      paddingVertical: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    translationButtonStart: {
+      backgroundColor: colors.primary,
+    },
+    translationButtonPause: {
+      backgroundColor: '#E53935',
+    },
+    translationButtonText: {
+      color: '#fff',
+      fontSize: 15,
+      fontWeight: '800',
     },
     bitRow: { flexDirection: 'row', justifyContent: 'space-between' },
     bitNode: {

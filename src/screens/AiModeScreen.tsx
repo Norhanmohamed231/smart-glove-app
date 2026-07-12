@@ -20,7 +20,7 @@ export default function AiModeScreen() {
   const styles = createStyles(colors);
 
   const { arabic, english, confidence, listeningLabel, hasDetection } = useAiDisplay();
-  const { isRecording, canRecord, collectedCount, toggleRecording } = useAiRecording();
+  const { isRecording, isPredicting, canRecord, collectedCount, toggleRecording } = useAiRecording();
   const {
     phrase,
     accuracy,
@@ -71,7 +71,7 @@ export default function AiModeScreen() {
           ]}
           activeOpacity={0.85}
           onPress={toggleRecording}
-          disabled={!canRecord && !isRecording}
+          disabled={!canRecord}
         >
           {isRecording ? (
             <Square size={22} color="#fff" fill="#fff" />
@@ -79,7 +79,11 @@ export default function AiModeScreen() {
             <Mic size={22} color="#fff" />
           )}
           <Text style={styles.recordButtonText}>
-            {isRecording ? `Stop (${collectedCount} frames)` : 'Start Recording'}
+            {isPredicting
+              ? 'Recognizing sign...'
+              : isRecording
+                ? `Recording... (${collectedCount} frames)`
+                : 'Start Recording'}
           </Text>
         </TouchableOpacity>
 

@@ -14,11 +14,13 @@ import { AI_UNKNOWN_AR, getAiEnglish } from '../features/ml/aiLabelMap';
 export function GlovePipelineProvider({ children }: { children: React.ReactNode }) {
   const inputSourceRef = useRef(useAppStore.getState().inputSource);
   const activeModeRef = useRef(useAppStore.getState().activeMode);
+  const isTranslationActiveRef = useRef(useAppStore.getState().isTranslationActive);
 
   useEffect(() => {
     return useAppStore.subscribe((state) => {
       inputSourceRef.current = state.inputSource;
       activeModeRef.current = state.activeMode;
+      isTranslationActiveRef.current = state.isTranslationActive;
     });
   }, []);
 
@@ -53,6 +55,7 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
     const unsubFrames = gloveFrameStream.subscribe((frame) => {
       useAppStore.getState().setLatestFrame(frame);
 
+      if (!isTranslationActiveRef.current) return;
       if (inputSourceRef.current !== 'glove') return;
       if (activeModeRef.current === 'sensor' && !lstmInferenceEngine.isReady()) return;
 
@@ -63,6 +66,9 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
     });
 
     const unsubResults = gesturePipeline.onResult((result) => {
+      if (!isTranslationActiveRef.current) return;
+      if (result.mode !== activeModeRef.current) return;
+
       useAppStore.getState().setGestureResult(result);
       if (result.confidence != null) {
         useAppStore.getState().setConfidence(result.confidence);

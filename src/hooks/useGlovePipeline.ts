@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { bluetoothService } from '../features/bluetooth/BluetoothService';
 import { bitsToPattern } from '../features/binary/binarize';
@@ -8,13 +8,26 @@ import { useAppStore } from '../store/useAppStore';
 import type { AppMode } from '../features/parser/types';
 import { getAiEnglish } from '../features/ml/aiLabelMap';
 
+interface ActiveModeOptions {
+  initialTranslationActive?: boolean;
+}
+
 /** Activate the correct processor when a mode screen gains focus. */
-export function useActiveMode(mode: AppMode): void {
+export function useActiveMode(mode: AppMode, options: ActiveModeOptions = {}): void {
+  const initialTranslationActive = options.initialTranslationActive ?? true;
+
   useFocusEffect(
     useCallback(() => {
       useAppStore.getState().setActiveMode(mode);
+      useAppStore.getState().setTranslationActive(initialTranslationActive);
       gesturePipeline.setActiveMode(mode);
-    }, [mode]),
+
+      return () => {
+        useAppStore.getState().setTranslationActive(false);
+        useAppStore.getState().setGestureResult(null);
+        gesturePipeline.reset();
+      };
+    }, [mode, initialTranslationActive]),
   );
 }
 
@@ -54,6 +67,11 @@ export function useManualBinaryInput() {
     const next = [...current];
     next[index] = next[index] === 1 ? 0 : 1;
     useAppStore.getState().setInputSource('manual');
+    if (!useAppStore.getState().isTranslationActive) {
+      useAppStore.getState().setManualBits(next);
+      useAppStore.getState().setGestureResult(null);
+      return;
+    }
     applyManualBits(next);
   };
 
@@ -91,8 +109,10 @@ const AI_LISTENING_LABELS = {
   collecting: 'Recording gesture...',
   predicting: 'Recognizing sign...',
 } as const;
+const AI_AUTO_RECORDING_MS = 2000;
 
 export function useAiRecording() {
+  const autoStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aiCollectionState = useAppStore((s) => s.aiCollectionState);
   const modelStatus = useAppStore((s) => s.modelStatus);
   const connectionState = useAppStore((s) => s.connectionState);
@@ -101,16 +121,34 @@ export function useAiRecording() {
   const isRecording = aiCollectionState === 'collecting';
   const isPredicting = aiCollectionState === 'predicting';
   const canRecord =
-    modelStatus === 'ready' && connectionState === 'connected' && !isPredicting;
+    modelStatus === 'ready' && connectionState === 'connected' && !isRecording && !isPredicting;
   const collectedCount = isRecording ? gesturePipeline.getLstmProcessor().getCollectedCount() : 0;
 
+  useEffect(() => {
+    return () => {
+      if (autoStopTimerRef.current) {
+        clearTimeout(autoStopTimerRef.current);
+        autoStopTimerRef.current = null;
+      }
+    };
+  }, []);
+
   const toggleRecording = () => {
-    if (!canRecord && !isRecording) return;
-    if (isRecording) {
-      gesturePipeline.stopAiRecording();
-    } else {
-      gesturePipeline.startAiRecording();
+    if (!canRecord) return;
+
+    const started = gesturePipeline.startAiRecording();
+    if (!started) return;
+
+    if (autoStopTimerRef.current) {
+      clearTimeout(autoStopTimerRef.current);
     }
+
+    autoStopTimerRef.current = setTimeout(() => {
+      autoStopTimerRef.current = null;
+      if (gesturePipeline.getLstmProcessor().isRecording()) {
+        gesturePipeline.stopAiRecording();
+      }
+    }, AI_AUTO_RECORDING_MS);
   };
 
   return {
