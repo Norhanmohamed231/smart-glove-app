@@ -39,14 +39,14 @@
     "plugins": [
       "onnxruntime-react-native",
       "./plugins/withOnnxRuntimePackage.js",
-      "./plugins/withSttPackInstaller.js",
       [
         "expo-speech-recognition",
         {
           "microphonePermission": "signTalker needs microphone access for speech-to-text.",
           "speechRecognitionPermission": "signTalker needs speech recognition to convert your voice to text.",
           "androidSpeechServicePackages": [
-            "com.google.android.googlequicksearchbox"
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.as"
           ]
         }
       ],

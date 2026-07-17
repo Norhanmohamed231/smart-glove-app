@@ -2,6 +2,13 @@ import { Platform } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 
+import {
+  buildAndroidLocaleCheckOrder,
+  FALLBACK_GOOGLE_PACKAGES,
+  isArabicLocale,
+  pickPreferredArabic,
+} from './sttLocaleUtils';
+
 const ARABIC_LOCALES = ['ar-EG', 'ar-SA'] as const;
 
 const GOOGLE_VOICE_COMPONENTS = [
@@ -37,26 +44,42 @@ export async function checkNativeArabicPackSupport(): Promise<{
     return { autoDownloadSupported: false, installed: false, canAutoDownload: false };
   }
 
-  try {
-    const { installedLocales } = await ExpoSpeechRecognitionModule.getSupportedLocales({
-      androidRecognitionServicePackage: 'com.google.android.as',
-    });
+  const checkOrder = buildAndroidLocaleCheckOrder([...FALLBACK_GOOGLE_PACKAGES]);
 
-    const installed = installedLocales.some((tag) => tag.toLowerCase().startsWith('ar'));
-    if (installed) {
-      return { autoDownloadSupported: true, installed: true, canAutoDownload: false };
+  try {
+    for (const servicePackage of checkOrder) {
+      try {
+        const { installedLocales } = await ExpoSpeechRecognitionModule.getSupportedLocales({
+          androidRecognitionServicePackage: servicePackage,
+        });
+
+        if (pickPreferredArabic(installedLocales)) {
+          return { autoDownloadSupported: true, installed: true, canAutoDownload: false };
+        }
+      } catch {
+        // try next package
+      }
     }
 
-    const { locales } = await ExpoSpeechRecognitionModule.getSupportedLocales({
-      androidRecognitionServicePackage: 'com.google.android.googlequicksearchbox',
-    });
+    for (const servicePackage of checkOrder) {
+      try {
+        const { locales } = await ExpoSpeechRecognitionModule.getSupportedLocales({
+          androidRecognitionServicePackage: servicePackage,
+        });
 
-    const canDownload = locales.some((tag) => tag.toLowerCase().startsWith('ar'));
-    return {
-      autoDownloadSupported: true,
-      installed: false,
-      canAutoDownload: canDownload,
-    };
+        if (locales.some((tag) => isArabicLocale(tag))) {
+          return {
+            autoDownloadSupported: true,
+            installed: false,
+            canAutoDownload: true,
+          };
+        }
+      } catch {
+        // try next package
+      }
+    }
+
+    return { autoDownloadSupported: true, installed: false, canAutoDownload: true };
   } catch {
     return { autoDownloadSupported: true, installed: false, canAutoDownload: true };
   }

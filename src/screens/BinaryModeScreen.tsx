@@ -42,17 +42,10 @@ export default function BinaryModeScreen() {
   const { toggleManualBit } = useManualBinaryInput();
   const {
     phrase,
-    accuracy,
     isListening,
-    isAvailable,
     isChecking,
-    modeHint,
-    showInstallPack,
-    isInstallingPack,
     error,
-    info,
     toggleListening,
-    installOfflinePack,
   } = useStt();
 
   const isConnected = connectionState === 'connected';
@@ -173,14 +166,8 @@ export default function BinaryModeScreen() {
 
         <SpeakToTextCard
           phrase={phrase}
-          accuracy={accuracy}
           isListening={isListening}
           onMicPress={toggleListening}
-          modeHint={modeHint}
-          showInstallPack={showInstallPack}
-          isInstallingPack={isInstallingPack}
-          onInstallPack={installOfflinePack}
-          info={info}
           error={error}
           disabled={isChecking}
         />

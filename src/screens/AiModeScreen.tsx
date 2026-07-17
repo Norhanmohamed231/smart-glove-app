@@ -23,17 +23,10 @@ export default function AiModeScreen() {
   const { isRecording, isPredicting, canRecord, collectedCount, toggleRecording } = useAiRecording();
   const {
     phrase,
-    accuracy,
     isListening,
-    isAvailable,
     isChecking,
-    modeHint,
-    showInstallPack,
-    isInstallingPack,
     error,
-    info,
     toggleListening,
-    installOfflinePack,
   } = useStt();
   const addHistory = useAppStore((s) => s.addHistory);
 
@@ -91,14 +84,8 @@ export default function AiModeScreen() {
 
         <SpeakToTextCard
           phrase={phrase}
-          accuracy={accuracy}
           isListening={isListening}
           onMicPress={toggleListening}
-          modeHint={modeHint}
-          showInstallPack={showInstallPack}
-          isInstallingPack={isInstallingPack}
-          onInstallPack={installOfflinePack}
-          info={info}
           error={error}
           disabled={isChecking}
         />

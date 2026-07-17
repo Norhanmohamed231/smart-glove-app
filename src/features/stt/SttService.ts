@@ -7,10 +7,17 @@ import {
 
 import { getModelConfig } from '../ml/modelAssets';
 import {
+  ANDROID_ON_DEVICE_SERVICE,
+  buildAndroidLocaleCheckOrder,
+  buildAndroidOnlineCheckOrder,
+  FALLBACK_GOOGLE_PACKAGES,
+  getPreferredOnlinePackage,
+  pickPreferredArabic,
+} from './sttLocaleUtils';
+import {
   STT_NETWORK_ERROR_AR,
   STT_NO_GOOGLE_AR,
   STT_NO_SPEECH_AR,
-  STT_ONLINE_TRYING_AR,
   STT_PERMISSION_DENIED_AR,
   STT_UNAVAILABLE_AR,
   type SttAvailability,
@@ -19,12 +26,6 @@ import {
   type SttResult,
   type SttStatus,
 } from './types';
-
-const PREFERRED_LOCALES = ['ar-EG', 'ar-SA'] as const;
-const FALLBACK_GOOGLE_PACKAGES = [
-  'com.google.android.googlequicksearchbox',
-  'com.google.android.as',
-] as const;
 
 type ResultListener = (result: SttResult) => void;
 type ErrorListener = (code: SttErrorCode, message: string) => void;
@@ -42,14 +43,6 @@ function normalizeConfidence(value: number): number {
   return Math.round(Math.min(1, value) * 100);
 }
 
-function pickPreferredArabic(pool: string[]): string | null {
-  for (const preferred of PREFERRED_LOCALES) {
-    const match = pool.find((locale) => locale.toLowerCase() === preferred.toLowerCase());
-    if (match) return match;
-  }
-  return pool.find((locale) => locale.toLowerCase().startsWith('ar-')) ?? null;
-}
-
 function getAndroidApiLevel(): number {
   if (Platform.OS !== 'android') return 0;
   return typeof Platform.Version === 'number'
@@ -61,12 +54,14 @@ class SttService {
   private status: SttStatus = 'unchecked';
   private locale: string | null = null;
   private mode: SttMode | null = null;
+  private offlinePackAvailable = false;
   private androidServicePackage: string | null = null;
   private serviceCandidates: string[] = [];
   private serviceCandidateIndex = 0;
   private errorMessage: string | null = null;
   private infoMessage: string | null = null;
   private listening = false;
+  private restarting = false;
   private listenersAttached = false;
 
   private resultListener: ResultListener | null = null;
@@ -76,6 +71,7 @@ class SttService {
 
   private resultSub: { remove: () => void } | null = null;
   private errorSub: { remove: () => void } | null = null;
+  private startSub: { remove: () => void } | null = null;
   private endSub: { remove: () => void } | null = null;
   private nomatchSub: { remove: () => void } | null = null;
 
@@ -84,6 +80,7 @@ class SttService {
       status: this.status,
       locale: this.locale,
       mode: this.mode,
+      offlinePackAvailable: this.offlinePackAvailable,
       errorMessage: this.errorMessage,
       infoMessage: this.infoMessage,
     };
@@ -101,6 +98,10 @@ class SttService {
     return this.listening;
   }
 
+  isSessionActive(): boolean {
+    return this.listening;
+  }
+
   getServiceCandidates(): string[] {
     return [...this.serviceCandidates];
   }
@@ -115,6 +116,7 @@ class SttService {
     this.errorListener = onError;
     this.listeningListener = onListeningChange;
     this.infoListener = onInfo ?? null;
+    this.listeningListener(this.listening);
   }
 
   clearCallbacks(): void {
@@ -125,11 +127,16 @@ class SttService {
   }
 
   async checkAvailability(): Promise<SttAvailability> {
+    if (this.listening) {
+      return this.getAvailability();
+    }
+
     this.status = 'checking';
     this.errorMessage = null;
     this.infoMessage = null;
     this.locale = null;
     this.mode = null;
+    this.offlinePackAvailable = false;
     this.serviceCandidateIndex = 0;
 
     if (Platform.OS === 'android') {
@@ -170,15 +177,12 @@ class SttService {
     this.mode = resolution.mode;
     this.status = 'available';
 
-    if (resolution.optimistic) {
-      this.infoMessage = STT_ONLINE_TRYING_AR;
-      this.infoListener?.(this.infoMessage);
-    }
-
     return this.getAvailability();
   }
 
   async startListening(): Promise<void> {
+    if (this.listening) return;
+
     if (!this.locale) {
       const availability = await this.checkAvailability();
       if (availability.status !== 'available' || !availability.locale) {
@@ -193,20 +197,30 @@ class SttService {
       this.serviceCandidates.indexOf(this.androidServicePackage ?? ''),
     );
 
-    this.listening = true;
-    this.listeningListener?.(true);
+    this.setListening(true);
     this.beginRecognition();
   }
 
   stopListening(): void {
     if (!this.listening) return;
+    this.restarting = false;
     ExpoSpeechRecognitionModule.stop();
   }
 
   abortListening(): void {
     if (!this.listening) return;
+    this.restarting = false;
     ExpoSpeechRecognitionModule.abort();
     this.setListening(false);
+  }
+
+  private setListening(value: boolean): void {
+    if (this.listening === value) return;
+    this.listening = value;
+    if (!value) {
+      this.restarting = false;
+    }
+    this.listeningListener?.(value);
   }
 
   private discoverAndroidServicePackages(): string[] {
@@ -246,14 +260,14 @@ class SttService {
   }
 
   private async resolveAndroidArabicLocale(): Promise<LocaleResolution | null> {
-    const candidates =
-      this.serviceCandidates.length > 0
-        ? this.serviceCandidates
-        : [...FALLBACK_GOOGLE_PACKAGES];
+    const discovered =
+      this.serviceCandidates.length > 0 ? this.serviceCandidates : [...FALLBACK_GOOGLE_PACKAGES];
+    const offlineCheckOrder = buildAndroidLocaleCheckOrder(discovered);
+    const onlineCheckOrder = buildAndroidOnlineCheckOrder(discovered);
 
     const androidApi = getAndroidApiLevel();
     if (androidApi > 0 && androidApi < 33) {
-      this.androidServicePackage = candidates[0] ?? null;
+      this.androidServicePackage = getPreferredOnlinePackage(discovered);
       return {
         locale: 'ar-EG',
         mode: 'online',
@@ -261,22 +275,29 @@ class SttService {
       };
     }
 
-    for (const servicePackage of candidates) {
+    let offlineLocale: string | null = null;
+    for (const servicePackage of offlineCheckOrder) {
       try {
-        const { locales, installedLocales } =
-          await ExpoSpeechRecognitionModule.getSupportedLocales({
-            androidRecognitionServicePackage: servicePackage,
-          });
+        const { installedLocales } = await ExpoSpeechRecognitionModule.getSupportedLocales({
+          androidRecognitionServicePackage: servicePackage,
+        });
+        offlineLocale = pickPreferredArabic(installedLocales);
+        if (offlineLocale) break;
+      } catch {
+        // try next package
+      }
+    }
+    this.offlinePackAvailable = offlineLocale != null;
 
-        const onDeviceLocale = pickPreferredArabic(installedLocales);
-        if (onDeviceLocale) {
-          this.androidServicePackage = servicePackage;
-          return { locale: onDeviceLocale, mode: 'on_device' };
-        }
+    for (const servicePackage of onlineCheckOrder) {
+      try {
+        const { locales } = await ExpoSpeechRecognitionModule.getSupportedLocales({
+          androidRecognitionServicePackage: servicePackage,
+        });
 
         const onlineLocale = pickPreferredArabic(locales);
         if (onlineLocale) {
-          this.androidServicePackage = servicePackage;
+          this.androidServicePackage = getPreferredOnlinePackage([servicePackage, ...discovered]);
           return { locale: onlineLocale, mode: 'online' };
         }
       } catch {
@@ -284,24 +305,17 @@ class SttService {
       }
     }
 
-    if (candidates.length > 0) {
-      this.androidServicePackage = candidates[0];
-      return {
-        locale: 'ar-EG',
-        mode: 'online',
-        optimistic: true,
-      };
+    if (offlineLocale) {
+      this.androidServicePackage = ANDROID_ON_DEVICE_SERVICE;
+      return { locale: offlineLocale, mode: 'on_device' };
     }
 
-    if (ExpoSpeechRecognitionModule.isRecognitionAvailable()) {
-      return {
-        locale: 'ar-EG',
-        mode: 'online',
-        optimistic: true,
-      };
-    }
-
-    return null;
+    this.androidServicePackage = getPreferredOnlinePackage(discovered);
+    return {
+      locale: 'ar-EG',
+      mode: 'online',
+      optimistic: true,
+    };
   }
 
   private async resolveIosArabicLocale(): Promise<LocaleResolution | null> {
@@ -311,6 +325,7 @@ class SttService {
 
       const onDeviceLocale = pickPreferredArabic(installedLocales);
       if (onDeviceLocale) {
+        this.offlinePackAvailable = true;
         return { locale: onDeviceLocale, mode: 'on_device' };
       }
 
@@ -325,11 +340,14 @@ class SttService {
   }
 
   private beginRecognition(): void {
-    if (!this.locale || !this.mode) return;
+    if (!this.locale || !this.mode) {
+      this.errorListener?.('not_available', STT_UNAVAILABLE_AR);
+      this.setListening(false);
+      return;
+    }
 
     const contextualStrings = getModelConfig().classes;
     const useOnDevice = this.mode === 'on_device';
-    const servicePackage = this.androidServicePackage;
 
     const startOptions: Parameters<typeof ExpoSpeechRecognitionModule.start>[0] = {
       lang: this.locale,
@@ -339,16 +357,26 @@ class SttService {
       contextualStrings,
     };
 
-    if (servicePackage) {
-      startOptions.androidRecognitionServicePackage = servicePackage;
-    }
-
     if (useOnDevice) {
       startOptions.requiresOnDeviceRecognition = true;
       startOptions.addsPunctuation = true;
+      startOptions.androidRecognitionServicePackage = ANDROID_ON_DEVICE_SERVICE;
+    } else {
+      const onlinePackage = getPreferredOnlinePackage(
+        this.androidServicePackage
+          ? [this.androidServicePackage, ...this.serviceCandidates]
+          : this.serviceCandidates,
+      );
+      startOptions.androidRecognitionServicePackage = onlinePackage;
     }
 
-    ExpoSpeechRecognitionModule.start(startOptions);
+    try {
+      ExpoSpeechRecognitionModule.start(startOptions);
+    } catch {
+      if (this.fallbackFromOnDevice()) return;
+      this.errorListener?.('recognition_error', STT_UNAVAILABLE_AR);
+      this.setListening(false);
+    }
   }
 
   private attachNativeListeners(): void {
@@ -368,7 +396,12 @@ class SttService {
       },
     );
 
+    this.startSub = ExpoSpeechRecognitionModule.addListener('start', () => {
+      this.restarting = false;
+    });
+
     this.endSub = ExpoSpeechRecognitionModule.addListener('end', () => {
+      if (this.restarting) return;
       this.setListening(false);
     });
 
@@ -398,8 +431,21 @@ class SttService {
   }
 
   private handleError(event: ExpoSpeechRecognitionErrorEvent): void {
+    if (event.error === 'aborted') {
+      return;
+    }
+
     if (
       Platform.OS === 'android' &&
+      this.mode === 'on_device' &&
+      this.fallbackFromOnDevice()
+    ) {
+      return;
+    }
+
+    if (
+      Platform.OS === 'android' &&
+      this.mode === 'online' &&
       (event.error === 'service-not-allowed' || event.error === 'language-not-supported') &&
       this.tryNextServicePackage()
     ) {
@@ -408,24 +454,50 @@ class SttService {
 
     const code = this.mapErrorCode(event.error);
     const message = this.mapErrorMessage(event);
-    this.errorListener?.(code, message);
+    this.restarting = false;
+    if (message) {
+      this.errorListener?.(code, message);
+    }
     this.setListening(false);
   }
 
-  private tryNextServicePackage(): boolean {
-    if (this.serviceCandidates.length === 0) return false;
-
-    const nextIndex = this.serviceCandidateIndex + 1;
-    if (nextIndex >= this.serviceCandidates.length) return false;
-
-    this.serviceCandidateIndex = nextIndex;
-    this.androidServicePackage = this.serviceCandidates[nextIndex];
-
-    if (this.mode === 'on_device') {
-      this.mode = 'online';
+  private restartRecognition(): void {
+    this.restarting = true;
+    try {
+      ExpoSpeechRecognitionModule.abort();
+    } catch {
+      // ignore
     }
 
-    this.beginRecognition();
+    setTimeout(() => {
+      if (!this.listening) {
+        this.restarting = false;
+        return;
+      }
+      this.beginRecognition();
+    }, 200);
+  }
+
+  private fallbackFromOnDevice(): boolean {
+    if (this.mode !== 'on_device') return false;
+
+    this.mode = 'online';
+    this.androidServicePackage = getPreferredOnlinePackage(this.serviceCandidates);
+
+    this.restartRecognition();
+    return true;
+  }
+
+  private tryNextServicePackage(): boolean {
+    const onlineCandidates = buildAndroidOnlineCheckOrder(this.serviceCandidates);
+    const currentIndex = onlineCandidates.indexOf(this.androidServicePackage ?? '');
+    const nextIndex = currentIndex + 1;
+
+    if (nextIndex >= onlineCandidates.length) return false;
+
+    this.serviceCandidateIndex = nextIndex;
+    this.androidServicePackage = onlineCandidates[nextIndex];
+    this.restartRecognition();
     return true;
   }
 
@@ -465,12 +537,6 @@ class SttService {
       default:
         return event.message || STT_NO_SPEECH_AR;
     }
-  }
-
-  private setListening(value: boolean): void {
-    if (this.listening === value) return;
-    this.listening = value;
-    this.listeningListener?.(value);
   }
 }
 

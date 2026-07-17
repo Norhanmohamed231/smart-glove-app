@@ -22,6 +22,7 @@ export interface SttAvailability {
   status: SttStatus;
   locale: string | null;
   mode: SttMode | null;
+  offlinePackAvailable?: boolean;
   errorMessage: string | null;
   infoMessage?: string | null;
 }
