@@ -6,6 +6,7 @@ import { Bluetooth, BatteryMedium, Menu, Moon, Sun, Play, History as HistoryIcon
 import { useTheme } from '@/src/theme/ThemeProvider';
 import type { ThemeColors } from '@/src/theme/theme';
 import { DeviceScanModal } from '@/src/components/DeviceScanModal';
+import { HomeMenuModal } from '@/src/components/HomeMenuModal';
 import { useBluetoothControls } from '@/src/hooks/useGlovePipeline';
 import { useAppStore } from '@/src/store/useAppStore';
 
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const connectionState = useAppStore((s) => s.connectionState);
   const battery = useAppStore((s) => s.battery);
   const [modalVisible, setModalVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
 
   const isConnected = connectionState === 'connected';
@@ -63,7 +65,11 @@ export default function HomeScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.topBar}>
-          <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            activeOpacity={0.7}
+            onPress={() => setMenuVisible(true)}
+          >
             <Menu size={22} color={colors.textMain} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} activeOpacity={0.7} onPress={toggleTheme}>
@@ -133,6 +139,12 @@ export default function HomeScreen() {
           <Text style={styles.secondaryButtonText}>View History</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <HomeMenuModal
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        onManageConnection={handleManageConnection}
+      />
 
       <DeviceScanModal
         visible={modalVisible}

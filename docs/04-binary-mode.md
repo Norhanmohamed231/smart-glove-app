@@ -100,14 +100,37 @@ flex <  FLEX_THRESHOLD  →  bit = 0
 
 ---
 
+## تخصيص القاموس (Customize Dictionary)
+
+من **Binary Mode** → **Customize Dictionary**:
+
+1. اختر أي pattern من الـ 32 — مع **illustration** لشكل الإشارة
+2. عدّل **العبارة العربية** (كلمة أو جملة كاملة)
+3. عدّل **English translation** (اختياري — للعرض والنسخ)
+4. **Test Speech** ينطق العربي
+5. **Reset** يرجّع entry واحد للافتراضي، أو **Reset All** للكل
+
+التخصيص يُحفظ في AsyncStorage (`@signtalker/binary-dictionary`) ويُحمَّل عند فتح التطبيق.
+
+| Pattern | illustration |
+|---------|--------------|
+| `01011` | `assets/binary-gestures/01011.svg` |
+
+وثيقة كاملة: [09-binary-dictionary-customization.md](./09-binary-dictionary-customization.md)
+
+---
+
 ## الملفات الرئيسية
 
 ```text
 src/features/binary/BinaryGestureProcessor.ts
+src/features/binary/BinaryDictionaryStore.ts
+src/features/binary/gestureIllustrations.ts
 src/features/binary/binarize.ts
 src/features/binary/constants.ts
 src/features/binary/defaultDictionary.ts
 src/screens/BinaryModeScreen.tsx
+src/screens/BinaryDictionaryScreen.tsx
 src/hooks/useGlovePipeline.ts      # useBinaryDisplay, useManualBinaryInput
 ```
 

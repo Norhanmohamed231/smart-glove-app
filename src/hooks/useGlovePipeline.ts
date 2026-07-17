@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { bluetoothService } from '../features/bluetooth/BluetoothService';
 import { bitsToPattern } from '../features/binary/binarize';
+import { resolveBinaryDictionaryEntry } from '../features/binary/binaryDictionaryResolver';
 import { gesturePipeline } from '../features/pipeline';
 import { ttsService } from '../features/tts/TTSService';
 import { useAppStore } from '../store/useAppStore';
@@ -94,13 +95,13 @@ export function useBinaryDisplay() {
   const gestureResult = useAppStore((s) => s.gestureResult);
   const liveBits = useLiveBinaryBits();
   const pattern = bitsToPattern(liveBits);
-  const fallback = gesturePipeline.getBinaryProcessor().processManualBits(liveBits);
+  const fallbackEntry = resolveBinaryDictionaryEntry(pattern);
 
   return {
     liveBits,
     pattern,
-    label: gestureResult?.label ?? fallback.label,
-    phrase: gestureResult?.phrase ?? fallback.phrase,
+    label: gestureResult?.label ?? fallbackEntry.phrase,
+    phrase: gestureResult?.phrase ?? fallbackEntry.phrase,
   };
 }
 

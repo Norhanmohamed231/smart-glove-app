@@ -1,10 +1,12 @@
 import type { GloveFrame, GestureResult } from '../parser/types';
+import { resolveBinaryDictionaryEntry } from './binaryDictionaryResolver';
 import { bitsToPattern, flexToBits } from './binarize';
 import { DEBOUNCE_MS } from './constants';
-import { lookupWord } from './defaultDictionary';
+import { UNKNOWN_PATTERN } from './defaultDictionary';
 import type { IGestureProcessor } from '../pipeline/IGestureProcessor';
 
-export class BinaryGestureProcessor implements IGestureProcessor {  readonly mode = 'binary' as const;
+export class BinaryGestureProcessor implements IGestureProcessor {
+  readonly mode = 'binary' as const;
 
   private stablePattern: string | null = null;
   private pendingPattern: string | null = null;
@@ -27,8 +29,9 @@ export class BinaryGestureProcessor implements IGestureProcessor {  readonly mod
       this.stablePattern = this.pendingPattern;
     }
 
-    const label = lookupWord(pattern);
-    const phrase = label;
+    const entry = resolveBinaryDictionaryEntry(pattern);
+    const phrase = entry.phrase;
+    const label = phrase === UNKNOWN_PATTERN ? UNKNOWN_PATTERN : phrase;
 
     const result: GestureResult = {
       mode: 'binary',
@@ -51,12 +54,14 @@ export class BinaryGestureProcessor implements IGestureProcessor {  readonly mod
 
   processManualBits(bits: number[]): GestureResult {
     const pattern = bitsToPattern(bits);
-    const label = lookupWord(pattern);
+    const entry = resolveBinaryDictionaryEntry(pattern);
+    const phrase = entry.phrase;
+
     return {
       mode: 'binary',
-      label,
+      label: phrase,
       bits: pattern,
-      phrase: label,
+      phrase,
       isStable: true,
     };
   }

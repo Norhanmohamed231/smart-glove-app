@@ -19,6 +19,7 @@
 | الملف | المحتوى |
 |-------|---------|
 | [Binary Mode](./04-binary-mode.md) | 5 بت من حساسات الانحناء → قاموس عربي |
+| [Binary Dictionary Customization](./09-binary-dictionary-customization.md) | تخصيص القاموس + 32 illustration |
 | [AI Mode](./05-ai-mode.md) | تسجيل الإيماءة + LSTM ONNX |
 | [Speak to Text (STT)](./06-stt.md) | التعرف على الكلام العربي |
 

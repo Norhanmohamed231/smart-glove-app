@@ -1,4 +1,5 @@
 import React from 'react';
+import { router, type Href } from 'expo-router';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
@@ -16,7 +17,8 @@ import {
 import { useStt } from '@/src/hooks/useStt';
 import { useAppStore } from '@/src/store/useAppStore';
 import { ttsService } from '@/src/features/tts/TTSService';
-import { lookupEnglish, UNKNOWN_PATTERN } from '@/src/features/binary/defaultDictionary';
+import { resolveEnglishForEntry } from '@/src/features/binary/BinaryDictionaryStore';
+import { UNKNOWN_PATTERN } from '@/src/features/binary/defaultDictionary';
 
 const { width: screenWidth } = Dimensions.get('window');
 const FINGER_LABELS = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
@@ -54,8 +56,10 @@ export default function BinaryModeScreen() {
   } = useStt();
 
   const isConnected = connectionState === 'connected';
+  const binaryDictionary = useAppStore((s) => s.binaryDictionary);
   const bitsKey = liveBits.join('');
-  const english = lookupEnglish(bitsKey);
+  const dictionaryEntry = binaryDictionary[bitsKey];
+  const english = dictionaryEntry ? resolveEnglishForEntry(dictionaryEntry) : '—';
   const isKnown = label !== UNKNOWN_PATTERN;
   const canUseDetection = isTranslationActive && isKnown;
   const confidence = canUseDetection ? 100 : 0;
@@ -112,6 +116,14 @@ export default function BinaryModeScreen() {
           onPress={handleToggleTranslation}
         >
           <Text style={styles.translationButtonText}>{translationButtonLabel}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.customizeButton}
+          activeOpacity={0.85}
+          onPress={() => router.push('/binary-dictionary' as Href)}
+        >
+          <Text style={styles.customizeButtonText}>Customize Dictionary</Text>
         </TouchableOpacity>
 
         <Text style={styles.sectionLabel}>BIT MATRIX CONTROLLER</Text>
@@ -205,6 +217,21 @@ const createStyles = (colors: ThemeColors) =>
     translationButtonText: {
       color: '#fff',
       fontSize: 15,
+      fontWeight: '800',
+    },
+    customizeButton: {
+      marginTop: 12,
+      borderRadius: 16,
+      paddingVertical: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.tagBinary,
+      backgroundColor: 'rgba(168, 85, 247, 0.12)',
+    },
+    customizeButtonText: {
+      color: colors.tagBinary,
+      fontSize: 14,
       fontWeight: '800',
     },
     bitRow: { flexDirection: 'row', justifyContent: 'space-between' },

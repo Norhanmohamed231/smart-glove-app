@@ -3,6 +3,7 @@ import { bluetoothService } from '../features/bluetooth/BluetoothService';
 import { gesturePipeline, gloveFrameStream } from '../features/pipeline';
 import { ttsService } from '../features/tts/TTSService';
 import { useAppStore } from '../store/useAppStore';
+import { resolveEnglishForEntry } from '../features/binary/BinaryDictionaryStore';
 import { translateArabic, UNKNOWN_PATTERN } from '../features/binary/defaultDictionary';
 import { lstmInferenceEngine } from '../features/ml/LSTMInferenceEngine';
 import { AI_UNKNOWN_AR, getAiEnglish } from '../features/ml/aiLabelMap';
@@ -26,6 +27,7 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     useAppStore.getState().loadHistory();
+    void useAppStore.getState().loadBinaryDictionary();
   }, []);
 
   useEffect(() => {
@@ -82,7 +84,11 @@ export function GlovePipelineProvider({ children }: { children: React.ReactNode 
 
       if (result.isStable && result.label && !isAiUnknown && !isBinaryUnknown) {
         const english =
-          result.mode === 'sensor' ? getAiEnglish(result.label) : translateArabic(result.label);
+          result.mode === 'sensor'
+            ? getAiEnglish(result.label)
+            : result.bits
+              ? resolveEnglishForEntry(useAppStore.getState().getDictionaryEntry(result.bits))
+              : translateArabic(result.label);
 
         useAppStore.getState().addHistory({
           arabic: result.label,

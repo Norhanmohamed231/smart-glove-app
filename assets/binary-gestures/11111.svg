@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Hand pattern 11111">
+
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#121A30"/>
+      <stop offset="45%" stop-color="#070B18"/>
+      <stop offset="100%" stop-color="#050810"/>
+    </linearGradient>
+    <radialGradient id="ambientGlow" cx="120" cy="120" r="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A1040" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#121A30" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#070B18" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="palmGrad" cx="112" cy="158" r="82" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6B8098"/>
+      <stop offset="40%" stop-color="#52657A"/>
+      <stop offset="72%" stop-color="#3B4A5E"/>
+      <stop offset="100%" stop-color="#2A3544"/>
+    </radialGradient>
+    <linearGradient id="wristGrad" x1="120" y1="216" x2="120" y2="242" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B4A5E"/>
+      <stop offset="100%" stop-color="#243044"/>
+    </linearGradient>
+    <linearGradient id="nailGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F6E8DE"/>
+    </linearGradient>
+    <linearGradient id="badgeGrad" x1="14" y1="14" x2="92" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2.4" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+    <filter id="palmShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5.5" flood-color="#000000" flood-opacity="0.38"/>
+    </filter>
+    <filter id="bentGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#A855F7" flood-opacity="0.35"/>
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+    
+    <linearGradient id="skinGrad0" x1="40" y1="156" x2="56" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B87D58"/>
+      <stop offset="35%" stop-color="#CF9A72"/>
+      <stop offset="70%" stop-color="#E4B896"/>
+      <stop offset="100%" stop-color="#F7DCC4"/>
+    </linearGradient>
+    <linearGradient id="bentGrad0" x1="42" y1="156" x2="58" y2="168" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="45%" stop-color="#7C3AED"/>
+      <stop offset="75%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="skinGrad1" x1="76" y1="122" x2="92" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B87D58"/>
+      <stop offset="35%" stop-color="#CF9A72"/>
+      <stop offset="70%" stop-color="#E4B896"/>
+      <stop offset="100%" stop-color="#F7DCC4"/>
+    </linearGradient>
+    <linearGradient id="bentGrad1" x1="78" y1="122" x2="94" y2="134" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="45%" stop-color="#7C3AED"/>
+      <stop offset="75%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="skinGrad2" x1="104" y1="112" x2="120" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B87D58"/>
+      <stop offset="35%" stop-color="#CF9A72"/>
+      <stop offset="70%" stop-color="#E4B896"/>
+      <stop offset="100%" stop-color="#F7DCC4"/>
+    </linearGradient>
+    <linearGradient id="bentGrad2" x1="106" y1="112" x2="122" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="45%" stop-color="#7C3AED"/>
+      <stop offset="75%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="skinGrad3" x1="128" y1="116" x2="144" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B87D58"/>
+      <stop offset="35%" stop-color="#CF9A72"/>
+      <stop offset="70%" stop-color="#E4B896"/>
+      <stop offset="100%" stop-color="#F7DCC4"/>
+    </linearGradient>
+    <linearGradient id="bentGrad3" x1="130" y1="116" x2="146" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="45%" stop-color="#7C3AED"/>
+      <stop offset="75%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="skinGrad4" x1="150" y1="128" x2="166" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B87D58"/>
+      <stop offset="35%" stop-color="#CF9A72"/>
+      <stop offset="70%" stop-color="#E4B896"/>
+      <stop offset="100%" stop-color="#F7DCC4"/>
+    </linearGradient>
+    <linearGradient id="bentGrad4" x1="152" y1="128" x2="168" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="45%" stop-color="#7C3AED"/>
+      <stop offset="75%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="240" height="240" rx="20" fill="url(#bgGrad)"/>
+  <ellipse cx="120" cy="118" rx="88" ry="92" fill="url(#ambientGlow)" opacity="0.55"/>
+  <ellipse cx="120" cy="198" rx="58" ry="11" fill="#000000" opacity="0.2"/>
+
+  <path d="M 78.0 216.0 C 92.0 226.0 148.0 226.0 162.0 216.0 L 156.0 236.0 C 138.0 242.0 102.0 242.0 84.0 236.0 Z" fill="url(#wristGrad)" opacity="0.95"/>
+  <path d="M 90.0 224.0 Q 120.0 228.0 150.0 224.0" fill="none" stroke="#334155" stroke-width="1" opacity="0.45"/>
+  <path d="M 44.0 178.0 C 34.0 148.0 70.0 122.0 120.0 120.0 C 170.0 122.0 206.0 148.0 196.0 178.0 C 190.0 204.0 156.0 216.0 120.0 218.0 C 84.0 216.0 50.0 204.0 44.0 178.0 Z" fill="url(#palmGrad)" stroke="#55657A" stroke-width="1.3" filter="url(#palmShadow)"/>
+
+  <path d="M 90.0 172.0 Q 120.0 180.0 150.0 172.0" fill="none" stroke="#1E293B" stroke-width="1.3" stroke-linecap="round" opacity="0.5"/>
+  <path d="M 100.0 158.0 Q 120.0 164.0 140.0 158.0" fill="none" stroke="#64748B" stroke-width="0.9" stroke-linecap="round" opacity="0.35"/>
+  <ellipse cx="94.0" cy="168.0" rx="10" ry="7" fill="#1E293B" opacity="0.18"/>
+  <ellipse cx="146.0" cy="168.0" rx="10" ry="7" fill="#1E293B" opacity="0.18"/>
+  <ellipse cx="120.0" cy="162.0" rx="18" ry="10" fill="#6B8098" opacity="0.08"/>
+  <path d="M 163.9 129.0 C 165.9 119.1 169.9 115.5 167.9 105.0 A 6.0 6.0 0 0 1 156.1 103.0 C 154.1 112.9 150.1 116.5 152.1 127.0 A 6.0 6.0 0 0 1 163.9 129.0 Z" fill="url(#bentGrad4)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="158.6" cy="116.0" rx="2.6" ry="13.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-170.5 160.0 116.0)"/>
+  <circle cx="162.0" cy="104.0" r="2.2" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 157.5 106.8 C 155.8 99.9 165.8 131.8 167.5 122.8 A 5.3 5.3 0 0 1 176.5 117.2 C 178.2 124.1 168.2 92.2 166.5 101.2 A 5.3 5.3 0 0 1 157.5 106.8 Z" fill="url(#bentGrad4)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="165.7" cy="112.0" rx="2.3" ry="10.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-32.0 167.0 112.0)"/>
+  <circle cx="172.0" cy="120.0" r="1.9" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 168.0 120.9 C 166.1 113.6 170.1 147.1 172.0 138.9 A 4.1 4.1 0 0 1 180.0 137.1 C 181.9 144.4 177.9 110.9 176.0 119.1 A 4.1 4.1 0 0 1 168.0 120.9 Z" fill="url(#bentGrad4)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="173.0" cy="129.0" rx="1.8" ry="10.1" fill="#DDD6FE" opacity="0.18" transform="rotate(-12.5 174.0 129.0)"/>
+  <circle cx="176.0" cy="138.0" r="1.5" fill="#5B21B6" opacity="0.55"/>
+  <circle cx="176.0" cy="138.0" r="1.9" fill="#DDD6FE" opacity="0.35"/>
+  <path d="M 143.4 117.2 C 145.4 107.3 149.4 103.8 147.4 93.2 A 7.5 7.5 0 0 1 132.6 90.8 C 130.6 100.7 126.6 104.2 128.6 114.8 A 7.5 7.5 0 0 1 143.4 117.2 Z" fill="url(#bentGrad3)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="136.2" cy="104.0" rx="3.3" ry="13.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-170.5 138.0 104.0)"/>
+  <circle cx="140.0" cy="92.0" r="2.7" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 134.4 95.5 C 132.7 88.6 142.7 120.5 144.4 111.5 A 6.6 6.6 0 0 1 155.6 104.5 C 157.3 111.4 147.3 79.5 145.6 88.5 A 6.6 6.6 0 0 1 134.4 95.5 Z" fill="url(#bentGrad3)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="143.4" cy="100.0" rx="2.9" ry="10.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-32.0 145.0 100.0)"/>
+  <circle cx="150.0" cy="108.0" r="2.4" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 145.0 109.1 C 143.1 101.8 147.1 135.3 149.0 127.1 A 5.1 5.1 0 0 1 159.0 124.9 C 160.9 132.2 156.9 98.7 155.0 106.9 A 5.1 5.1 0 0 1 145.0 109.1 Z" fill="url(#bentGrad3)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="150.8" cy="117.0" rx="2.2" ry="10.1" fill="#DDD6FE" opacity="0.18" transform="rotate(-12.5 152.0 117.0)"/>
+  <circle cx="154.0" cy="126.0" r="1.8" fill="#5B21B6" opacity="0.55"/>
+  <circle cx="154.0" cy="126.0" r="2.4" fill="#DDD6FE" opacity="0.35"/>
+  <path d="M 119.9 113.3 C 121.9 103.4 125.9 99.9 123.9 89.3 A 8.0 8.0 0 0 1 108.1 86.7 C 106.1 96.6 102.1 100.1 104.1 110.7 A 8.0 8.0 0 0 1 119.9 113.3 Z" fill="url(#bentGrad2)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="112.1" cy="100.0" rx="3.5" ry="13.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-170.5 114.0 100.0)"/>
+  <circle cx="116.0" cy="88.0" r="2.9" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 110.0 91.7 C 108.3 84.9 118.3 116.7 120.0 107.7 A 7.0 7.0 0 0 1 132.0 100.3 C 133.7 107.1 123.7 75.3 122.0 84.3 A 7.0 7.0 0 0 1 110.0 91.7 Z" fill="url(#bentGrad2)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="119.3" cy="96.0" rx="3.1" ry="10.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-32.0 121.0 96.0)"/>
+  <circle cx="126.0" cy="104.0" r="2.5" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 120.7 105.2 C 118.7 97.9 122.7 131.4 124.7 123.2 A 5.4 5.4 0 0 1 135.3 120.8 C 137.3 128.1 133.3 94.6 131.3 102.8 A 5.4 5.4 0 0 1 120.7 105.2 Z" fill="url(#bentGrad2)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="126.7" cy="113.0" rx="2.4" ry="10.1" fill="#DDD6FE" opacity="0.18" transform="rotate(-12.5 128.0 113.0)"/>
+  <circle cx="130.0" cy="122.0" r="2.0" fill="#5B21B6" opacity="0.55"/>
+  <circle cx="130.0" cy="122.0" r="2.6" fill="#DDD6FE" opacity="0.35"/>
+  <path d="M 91.4 120.8 C 93.4 110.2 89.4 106.7 87.4 96.8 A 7.5 7.5 0 0 1 72.6 99.2 C 70.6 109.8 74.6 113.3 76.6 123.2 A 7.5 7.5 0 0 1 91.4 120.8 Z" fill="url(#bentGrad1)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="80.2" cy="110.0" rx="3.3" ry="13.4" fill="#DDD6FE" opacity="0.18" transform="rotate(-189.5 82.0 110.0)"/>
+  <circle cx="80.0" cy="98.0" r="2.7" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 74.4 94.5 C 72.7 85.5 62.7 117.4 64.4 110.5 A 6.6 6.6 0 0 1 75.6 117.5 C 77.3 126.5 87.3 94.6 85.6 101.5 A 6.6 6.6 0 0 1 74.4 94.5 Z" fill="url(#bentGrad1)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="73.4" cy="106.0" rx="2.9" ry="10.4" fill="#DDD6FE" opacity="0.18" transform="rotate(32.0 75.0 106.0)"/>
+  <circle cx="70.0" cy="114.0" r="2.4" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 65.0 112.9 C 63.1 104.7 59.1 138.2 61.0 130.9 A 5.1 5.1 0 0 1 71.0 133.1 C 72.9 141.3 76.9 107.8 75.0 115.1 A 5.1 5.1 0 0 1 65.0 112.9 Z" fill="url(#bentGrad1)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="66.8" cy="123.0" rx="2.2" ry="10.1" fill="#DDD6FE" opacity="0.18" transform="rotate(12.5 68.0 123.0)"/>
+  <circle cx="66.0" cy="132.0" r="1.8" fill="#5B21B6" opacity="0.55"/>
+  <circle cx="66.0" cy="132.0" r="2.4" fill="#DDD6FE" opacity="0.35"/>
+  <path d="M 54.1 163.9 C 55.4 155.9 73.4 161.0 72.1 149.9 A 10.0 10.0 0 0 1 59.9 134.1 C 58.6 142.1 40.6 137.0 41.9 148.1 A 10.0 10.0 0 0 1 54.1 163.9 Z" fill="url(#bentGrad0)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="54.6" cy="149.0" rx="4.4" ry="12.5" fill="#DDD6FE" opacity="0.18" transform="rotate(-127.9 57.0 149.0)"/>
+  <circle cx="66.0" cy="142.0" r="3.6" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 60.2 148.6 C 58.8 140.0 76.8 176.2 78.2 164.6 A 8.8 8.8 0 0 1 89.8 151.4 C 91.2 160.0 73.2 123.8 71.8 135.4 A 8.8 8.8 0 0 1 60.2 148.6 Z" fill="url(#bentGrad0)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="72.9" cy="150.0" rx="3.9" ry="13.2" fill="#DDD6FE" opacity="0.18" transform="rotate(-48.4 75.0 150.0)"/>
+  <circle cx="84.0" cy="158.0" r="3.2" fill="#5B21B6" opacity="0.55"/>
+  <path d="M 78.6 162.2 C 77.0 153.8 91.0 191.0 92.6 180.2 A 6.8 6.8 0 0 1 103.4 171.8 C 105.0 180.2 91.0 143.0 89.4 153.8 A 6.8 6.8 0 0 1 78.6 162.2 Z" fill="url(#bentGrad0)" stroke="#6D28D9" stroke-width="1.1" stroke-linejoin="round" filter="url(#bentGlow)"/>
+  <ellipse cx="89.4" cy="167.0" rx="3.0" ry="12.5" fill="#DDD6FE" opacity="0.18" transform="rotate(-37.9 91.0 167.0)"/>
+  <circle cx="98.0" cy="176.0" r="2.5" fill="#5B21B6" opacity="0.55"/>
+  <circle cx="98.0" cy="176.0" r="3.2" fill="#DDD6FE" opacity="0.35"/>
+
+  <rect x="14" y="14" width="78" height="28" rx="14" fill="url(#badgeGrad)" opacity="0.22"/>
+  <rect x="14" y="14" width="78" height="28" rx="14" fill="none" stroke="#7C3AED" stroke-width="1" opacity="0.35"/>
+  <text x="53" y="33" text-anchor="middle" font-family="Consolas, monospace" font-size="13" font-weight="700" fill="#E9D5FF">11111</text>
+  <rect x="34.0" y="214" width="28.0" height="16" rx="8" fill="#D8B4FE" opacity="0.12"/>
+  <text x="48.0" y="226" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#D8B4FE">T:1</text>
+  <rect x="70.0" y="214" width="28.0" height="16" rx="8" fill="#D8B4FE" opacity="0.12"/>
+  <text x="84.0" y="226" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#D8B4FE">I:1</text>
+  <rect x="98.0" y="214" width="28.0" height="16" rx="8" fill="#D8B4FE" opacity="0.12"/>
+  <text x="112.0" y="226" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#D8B4FE">M:1</text>
+  <rect x="122.0" y="214" width="28.0" height="16" rx="8" fill="#D8B4FE" opacity="0.12"/>
+  <text x="136.0" y="226" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#D8B4FE">R:1</text>
+  <rect x="144.0" y="214" width="28.0" height="16" rx="8" fill="#D8B4FE" opacity="0.12"/>
+  <text x="158.0" y="226" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#D8B4FE">P:1</text>
+</svg>

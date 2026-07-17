@@ -19,6 +19,7 @@ Mobile companion app for the **SignGlove** assistive glove: receives sensor data
 | Runtime permissions | Done | Android 12+ `BLUETOOTH_CONNECT` / `BLUETOOTH_SCAN` + `RECORD_AUDIO` |
 | Live data parser | Done | 14-field CSV lines from ESP32 |
 | **Binary mode** | Done | 5-bit flex → dictionary → `expo-speech` TTS |
+| **Binary dictionary customization** | Done | 32 personalizable phrases + hand illustrations |
 | Manual binary input | Done | Toggle bits without hardware |
 | **AI mode** | Done | ONNX LSTM (20 classes) · manual Start/Stop recording |
 | **Speak to Text** | Done | On-device Arabic STT (`expo-speech-recognition`) |
@@ -50,6 +51,7 @@ Detailed guides (Arabic) in [`docs/`](docs/README.md). Team roles (12 members): 
 ## Features
 
 - **Binary mode** — Real-time binarization (`flex ≥ 2000` → bent), debounced dictionary lookup, Arabic phrase output, TTS with cooldown.
+- **Custom binary dictionary** — Edit any of 32 gesture slots with Arabic phrase, optional English, SVG hand illustration, AsyncStorage persistence.
 - **AI mode** — Gesture recording via Start/Stop → ONNX LSTM inference → Arabic word + confidence → TTS + History.
 - **Speak to Text** — On-device Arabic speech recognition (ar-EG / ar-SA); tap mic to start/stop.
 - **Device scan modal** — Filters bonded/discovered devices (`SignGlove`, `sign`, `esp32` name hints).
@@ -206,7 +208,7 @@ ESP32 (CSV) → BluetoothService → GloveDataParser → gloveFrameStream
 | **1** | Binary mode, Classic BT, on-device TTS — **done** |
 | **2** | AI mode with ONNX LSTM — **done** |
 | **2.5** | On-device Arabic STT — **done** |
-| **1.5** | Calibration UI, dictionary editor, real battery from glove |
+| **1.5** | Custom binary dictionary + gesture illustrations — **done** |
 | **3** | Optional BLE migration, expanded vocabulary |
 
 ---

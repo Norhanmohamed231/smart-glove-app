@@ -9,6 +9,13 @@ import type {
   BluetoothDeviceInfo,
 } from '../features/parser/types';
 import type { AiCollectionState, ModelStatus } from '../features/ml/types';
+import {
+  BinaryDictionaryStore,
+  getEffectiveDictionary,
+  validateDictionaryInput,
+} from '../features/binary/BinaryDictionaryStore';
+import { setBinaryDictionaryResolver } from '../features/binary/binaryDictionaryResolver';
+import type { DictionaryEntry, DictionaryOverrides } from '../features/binary/types';
 
 export type HistorySource = 'AI' | 'Binary' | 'Speech';
 
@@ -32,13 +39,14 @@ interface AppState {
   gestureResult: GestureResult | null;
   manualBits: number[];
   scannedDevices: BluetoothDeviceInfo[];
-  // Mock until firmware/model wiring (see plan placeholders).
   battery: number;
   confidence: number;
   modelStatus: ModelStatus;
   modelError: string | null;
   aiCollectionState: AiCollectionState;
   history: HistoryEntry[];
+  binaryDictionary: Record<string, DictionaryEntry>;
+  dictionaryOverrides: DictionaryOverrides | null;
   setConnectionState: (state: ConnectionState, deviceName?: string | null) => void;
   setActiveMode: (mode: AppMode) => void;
   setInputSource: (source: InputSource) => void;
@@ -55,10 +63,26 @@ interface AppState {
   addHistory: (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => void;
   clearHistory: () => void;
   loadHistory: () => void;
+  loadBinaryDictionary: () => Promise<void>;
+  getDictionaryEntry: (bits: string) => DictionaryEntry;
+  saveDictionaryEntry: (bits: string, phrase: string, english?: string) => Promise<boolean>;
+  resetDictionaryEntry: (bits: string) => Promise<void>;
+  resetAllDictionary: () => Promise<void>;
+  syncBinaryDictionaryResolver: () => void;
 }
 
 function persistHistory(history: HistoryEntry[]) {
   AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)).catch(() => {});
+}
+
+function applyDictionaryState(
+  set: (partial: Partial<AppState>) => void,
+  get: () => AppState,
+  overrides: DictionaryOverrides | null,
+) {
+  const binaryDictionary = getEffectiveDictionary(overrides);
+  set({ dictionaryOverrides: overrides, binaryDictionary });
+  get().syncBinaryDictionaryResolver();
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -77,6 +101,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   modelError: null,
   aiCollectionState: 'idle',
   history: [],
+  binaryDictionary: getEffectiveDictionary(null),
+  dictionaryOverrides: null,
 
   setConnectionState: (connectionState, deviceName = null) =>
     set({ connectionState, connectedDeviceName: deviceName ?? null }),
@@ -136,4 +162,47 @@ export const useAppStore = create<AppState>((set, get) => ({
       })
       .catch(() => {});
   },
+
+  syncBinaryDictionaryResolver: () => {
+    setBinaryDictionaryResolver((bits) => get().getDictionaryEntry(bits));
+  },
+
+  getDictionaryEntry: (bits) => {
+    return get().binaryDictionary[bits] ?? getEffectiveDictionary(null)[bits];
+  },
+
+  loadBinaryDictionary: async () => {
+    const overrides = await BinaryDictionaryStore.load();
+    applyDictionaryState(set, get, overrides);
+  },
+
+  saveDictionaryEntry: async (bits, phrase, english) => {
+    const input = validateDictionaryInput(phrase, english);
+    if (!input) return false;
+
+    const overrides = BinaryDictionaryStore.applyEntryOverride(
+      get().dictionaryOverrides,
+      bits,
+      input.phrase,
+      input.english,
+    );
+
+    const nextOverrides = Object.keys(overrides.entries).length === 0 ? null : overrides;
+    await BinaryDictionaryStore.persist(nextOverrides);
+    applyDictionaryState(set, get, nextOverrides);
+    return true;
+  },
+
+  resetDictionaryEntry: async (bits) => {
+    const overrides = BinaryDictionaryStore.removeEntryOverride(get().dictionaryOverrides, bits);
+    await BinaryDictionaryStore.persist(overrides);
+    applyDictionaryState(set, get, overrides);
+  },
+
+  resetAllDictionary: async () => {
+    await BinaryDictionaryStore.persist(null);
+    applyDictionaryState(set, get, null);
+  },
 }));
+
+useAppStore.getState().syncBinaryDictionaryResolver();
