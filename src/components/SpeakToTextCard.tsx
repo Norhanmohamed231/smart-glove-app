@@ -1,8 +1,8 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Mic } from 'lucide-react-native';
-import { useTheme } from '../theme/ThemeProvider';
-import type { ThemeColors } from '../theme/theme';
+import { Mic } from "lucide-react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../theme/ThemeProvider";
+import type { ThemeColors } from "../theme/theme";
 
 interface SpeakToTextCardProps {
   phrase: string;
@@ -21,7 +21,7 @@ export function SpeakToTextCard({
   onMicPress,
   error,
   disabled = false,
-  placeholder = 'اضغط المايك واتكلم بالعربي',
+  placeholder = "اضغط المايك واتكلم بالعربي",
 }: SpeakToTextCardProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -44,7 +44,7 @@ export function SpeakToTextCard({
       </TouchableOpacity>
 
       <Text style={styles.statusText}>
-        {isListening ? 'جاري الاستماع... اضغط مرة أخرى للإيقاف' : 'اضغط للبدء'}
+        {isListening ? "جاري الاستماع... اضغط مرة أخرى للإيقاف" : "اضغط للبدء"}
       </Text>
 
       <Text style={styles.phrase} numberOfLines={3}>
@@ -65,33 +65,43 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.cardBorder,
       padding: 22,
-      alignItems: 'center',
+      alignItems: "center",
     },
-    title: { color: colors.textDescription, fontSize: 14, fontWeight: '600', marginBottom: 16 },
+    title: {
+      color: colors.textDescription,
+      fontSize: 14,
+      fontWeight: "600",
+      marginBottom: 16,
+    },
     micButton: {
       width: 64,
       height: 64,
       borderRadius: 32,
       backgroundColor: colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       marginBottom: 12,
     },
-    micButtonActive: { backgroundColor: '#E53935' },
+    micButtonActive: { backgroundColor: "#E53935" },
     micButtonDisabled: { opacity: 0.45 },
     statusText: {
       color: colors.textMuted,
       fontSize: 13,
       marginBottom: 8,
-      textAlign: 'center',
+      textAlign: "center",
     },
-    phrase: { color: colors.textMain, fontSize: 16, fontWeight: '500', textAlign: 'center' },
+    phrase: {
+      color: colors.textMain,
+      fontSize: 16,
+      fontWeight: "500",
+      textAlign: "center",
+    },
     accuracy: { color: colors.textMuted, fontSize: 13, marginTop: 8 },
     error: {
-      color: '#E53935',
+      color: "#E53935",
       fontSize: 13,
       marginTop: 12,
-      textAlign: 'center',
+      textAlign: "center",
       lineHeight: 20,
     },
   });
