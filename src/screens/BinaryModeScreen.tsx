@@ -42,6 +42,7 @@ export default function BinaryModeScreen() {
   const { toggleManualBit } = useManualBinaryInput();
   const {
     phrase,
+    accuracy,
     isListening,
     isChecking,
     error,
@@ -166,6 +167,7 @@ export default function BinaryModeScreen() {
 
         <SpeakToTextCard
           phrase={phrase}
+          accuracy={accuracy}
           isListening={isListening}
           onMicPress={toggleListening}
           error={error}

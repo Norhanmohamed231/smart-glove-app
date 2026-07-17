@@ -23,6 +23,7 @@ export default function AiModeScreen() {
   const { isRecording, isPredicting, canRecord, collectedCount, toggleRecording } = useAiRecording();
   const {
     phrase,
+    accuracy,
     isListening,
     isChecking,
     error,
@@ -84,6 +85,7 @@ export default function AiModeScreen() {
 
         <SpeakToTextCard
           phrase={phrase}
+          accuracy={accuracy}
           isListening={isListening}
           onMicPress={toggleListening}
           error={error}

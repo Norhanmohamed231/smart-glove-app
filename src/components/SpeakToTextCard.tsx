@@ -6,6 +6,7 @@ import type { ThemeColors } from '../theme/theme';
 
 interface SpeakToTextCardProps {
   phrase: string;
+  accuracy: number;
   isListening: boolean;
   onMicPress: () => void;
   error?: string | null;
@@ -15,6 +16,7 @@ interface SpeakToTextCardProps {
 
 export function SpeakToTextCard({
   phrase,
+  accuracy,
   isListening,
   onMicPress,
   error,
@@ -48,6 +50,7 @@ export function SpeakToTextCard({
       <Text style={styles.phrase} numberOfLines={3}>
         {phrase || placeholder}
       </Text>
+      <Text style={styles.accuracy}>Accuracy: {Math.round(accuracy)}%</Text>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
@@ -83,6 +86,7 @@ const createStyles = (colors: ThemeColors) =>
       textAlign: 'center',
     },
     phrase: { color: colors.textMain, fontSize: 16, fontWeight: '500', textAlign: 'center' },
+    accuracy: { color: colors.textMuted, fontSize: 13, marginTop: 8 },
     error: {
       color: '#E53935',
       fontSize: 13,

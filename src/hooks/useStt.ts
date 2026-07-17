@@ -12,6 +12,7 @@ export function useStt() {
   const [mode, setMode] = useState<SttMode | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [phrase, setPhrase] = useState('');
+  const [accuracy, setAccuracy] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const isAvailable = status === 'available';
@@ -31,6 +32,7 @@ export function useStt() {
     sttService.setCallbacks(
       (result: SttResult) => {
         setPhrase(result.arabic);
+        setAccuracy(result.confidence);
         setError(null);
 
         if (result.isFinal && result.arabic) {
@@ -86,6 +88,7 @@ export function useStt() {
     isChecking,
     mode,
     phrase,
+    accuracy,
     error,
     toggleListening,
     refreshAvailability,
